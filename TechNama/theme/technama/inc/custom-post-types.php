@@ -53,6 +53,30 @@ function technama_register_post_types() {
         'show_in_rest'       => true,
     ));
 
+    // Press Release CPT
+    register_post_type('press_release', array(
+        'labels' => array(
+            'name'               => __('Press Releases', 'technama'),
+            'singular_name'      => __('Press Release', 'technama'),
+            'add_new_item'       => __('Add New Press Release', 'technama'),
+            'edit_item'          => __('Edit Press Release', 'technama'),
+            'all_items'          => __('All Press Releases', 'technama'),
+            'view_item'          => __('View Press Release', 'technama'),
+            'search_items'       => __('Search Press Releases', 'technama'),
+            'not_found'          => __('No press releases found.', 'technama'),
+            'menu_name'          => __('Press Releases', 'technama'),
+        ),
+        'public'             => false,
+        'show_ui'            => true,
+        'has_archive'        => false,
+        'rewrite'            => array('slug' => 'press-release'),
+        'supports'           => array('title', 'editor', 'thumbnail', 'excerpt', 'custom-fields'),
+        'menu_icon'          => 'dashicons-megaphone',
+        'show_in_rest'       => true,
+        'capability_type'    => 'post',
+        'map_meta_cap'       => true,
+    ));
+
     // Reviews CPT
     register_post_type('reviews', array(
         'labels' => array(
@@ -101,6 +125,29 @@ function technama_register_taxonomies() {
         'show_admin_column' => true,
         'show_in_rest'      => true,
         'rewrite'           => array('slug' => 'tech-topic'),
+    ));
+
+    // Video Category Taxonomy
+    register_taxonomy('video_category', array('video_review'), array(
+        'labels' => array(
+            'name'              => __('Video Categories', 'technama'),
+            'singular_name'     => __('Video Category', 'technama'),
+            'search_items'      => __('Search Video Categories', 'technama'),
+            'all_items'         => __('All Video Categories', 'technama'),
+            'parent_item'       => __('Parent Video Category', 'technama'),
+            'parent_item_colon' => __('Parent Video Category:', 'technama'),
+            'edit_item'         => __('Edit Video Category', 'technama'),
+            'update_item'       => __('Update Video Category', 'technama'),
+            'add_new_item'      => __('Add New Video Category', 'technama'),
+            'new_item_name'     => __('New Video Category Name', 'technama'),
+            'menu_name'         => __('Video Categories', 'technama'),
+        ),
+        'hierarchical'      => true,
+        'public'            => true,
+        'show_ui'           => true,
+        'show_admin_column' => true,
+        'show_in_rest'      => true,
+        'rewrite'           => array('slug' => 'video-category'),
     ));
 
     // Brand Taxonomy for deals and reviews

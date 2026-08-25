@@ -87,6 +87,23 @@ function technama_enqueue_scripts() {
         'nonce'   => wp_create_nonce('technama_nonce'),
     ));
 
+    // Membership script - load on membership page and single posts (for bookmark)
+    if (is_page_template('page-templates/template-membership.php') || is_single()) {
+        wp_enqueue_script(
+            'technama-membership',
+            get_stylesheet_directory_uri() . '/assets/js/membership.js',
+            array('technama-main'),
+            wp_get_theme()->get('Version'),
+            true
+        );
+
+        wp_localize_script('technama-membership', 'tnMembership', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('technama_nonce'),
+            'login_url' => wp_login_url(home_url('/membership/')),
+        ));
+    }
+
     // Comment reply script
     if (is_singular() && comments_open() && get_option('thread_comments')) {
         wp_enqueue_script('comment-reply');

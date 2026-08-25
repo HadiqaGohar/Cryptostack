@@ -133,8 +133,127 @@ function technama_widgets_init() {
         'before_title'  => '<h3 class="widget-title">',
         'after_title'   => '</h3>',
     ));
+
+    // Sponsor Banner Widget Areas
+    register_sidebar(array(
+        'name'          => __('Sponsor: Homepage Leaderboard', 'technama'),
+        'id'            => 'sponsor-homepage-leaderboard',
+        'before_widget' => '<div class="tn-sponsor-banner tn-sponsor-leaderboard">',
+        'after_widget'  => '</div>',
+        'before_title'  => '<span class="screen-reader-text">',
+        'after_title'   => '</span>',
+    ));
+
+    register_sidebar(array(
+        'name'          => __('Sponsor: Sidebar Banner', 'technama'),
+        'id'            => 'sponsor-sidebar',
+        'before_widget' => '<div class="tn-sponsor-banner tn-sponsor-sidebar">',
+        'after_widget'  => '</div>',
+        'before_title'  => '<span class="screen-reader-text">',
+        'after_title'   => '</span>',
+    ));
+
+    register_sidebar(array(
+        'name'          => __('Sponsor: Article Top', 'technama'),
+        'id'            => 'sponsor-article-top',
+        'before_widget' => '<div class="tn-sponsor-banner tn-sponsor-article">',
+        'after_widget'  => '</div>',
+        'before_title'  => '<span class="screen-reader-text">',
+        'after_title'   => '</span>',
+    ));
+
+    register_sidebar(array(
+        'name'          => __('Sponsor: Footer Banner', 'technama'),
+        'id'            => 'sponsor-footer',
+        'before_widget' => '<div class="tn-sponsor-banner tn-sponsor-footer">',
+        'after_widget'  => '</div>',
+        'before_title'  => '<span class="screen-reader-text">',
+        'after_title'   => '</span>',
+    ));
 }
 add_action('widgets_init', 'technama_widgets_init');
+
+/**
+ * Display sponsor banner
+ */
+function technama_display_sponsor($location) {
+    if (is_active_sidebar($location)) {
+        echo '<div class="tn-sponsor-area">';
+        dynamic_sidebar($location);
+        echo '</div>';
+    }
+}
+
+/**
+ * Sponsor content management page
+ */
+function technama_sponsor_admin_page() {
+    add_menu_page(
+        __('Sponsor Management', 'technama'),
+        __('Sponsors', 'technama'),
+        'manage_options',
+        'technama-sponsors',
+        'technama_sponsor_admin_page_callback',
+        'dashicons-money-alt',
+        30
+    );
+}
+add_action('admin_menu', 'technama_sponsor_admin_page');
+
+function technama_sponsor_admin_page_callback() {
+    ?>
+    <div class="wrap">
+        <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+        <p><?php _e('Manage sponsor banners and advertising placements.', 'technama'); ?></p>
+
+        <h2><?php _e('Active Banner Placements', 'technama'); ?></h2>
+        <table class="wp-list-table widefat fixed striped">
+            <thead>
+                <tr>
+                    <th><?php _e('Placement', 'technama'); ?></th>
+                    <th><?php _e('Dimensions', 'technama'); ?></th>
+                    <th><?php _e('Status', 'technama'); ?></th>
+                    <th><?php _e('Action', 'technama'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><?php _e('Homepage Leaderboard', 'technama'); ?></td>
+                    <td>728 x 90</td>
+                    <td><?php echo is_active_sidebar('sponsor-homepage-leaderboard') ? '<span style="color:green">Active</span>' : '<span style="color:red">Empty</span>'; ?></td>
+                    <td><a href="<?php echo admin_url('widgets.php'); ?>"><?php _e('Configure', 'technama'); ?></a></td>
+                </tr>
+                <tr>
+                    <td><?php _e('Sidebar Banner', 'technama'); ?></td>
+                    <td>300 x 250</td>
+                    <td><?php echo is_active_sidebar('sponsor-sidebar') ? '<span style="color:green">Active</span>' : '<span style="color:red">Empty</span>'; ?></td>
+                    <td><a href="<?php echo admin_url('widgets.php'); ?>"><?php _e('Configure', 'technama'); ?></a></td>
+                </tr>
+                <tr>
+                    <td><?php _e('Article Top Banner', 'technama'); ?></td>
+                    <td>728 x 90</td>
+                    <td><?php echo is_active_sidebar('sponsor-article-top') ? '<span style="color:green">Active</span>' : '<span style="color:red">Empty</span>'; ?></td>
+                    <td><a href="<?php echo admin_url('widgets.php'); ?>"><?php _e('Configure', 'technama'); ?></a></td>
+                </tr>
+                <tr>
+                    <td><?php _e('Footer Banner', 'technama'); ?></td>
+                    <td>728 x 90</td>
+                    <td><?php echo is_active_sidebar('sponsor-footer') ? '<span style="color:green">Active</span>' : '<span style="color:red">Empty</span>'; ?></td>
+                    <td><a href="<?php echo admin_url('widgets.php'); ?>"><?php _e('Configure', 'technama'); ?></a></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2><?php _e('How to Add Sponsor Content', 'technama'); ?></h2>
+        <ol>
+            <li><?php _e('Go to Appearance &rarr; Widgets', 'technama'); ?></li>
+            <li><?php _e('Find the sponsor banner area you want to configure', 'technama'); ?></li>
+            <li><?php _e('Add a "Custom HTML" widget with your banner code or image', 'technama'); ?></li>
+            <li><?php _e('For images: Upload to Media Library, then add an Image widget', 'technama'); ?></li>
+        </ol>
+    </div>
+    <?php
+}
 
 /**
  * Enqueue styles and scripts
@@ -264,59 +383,52 @@ function technama_reading_time_widget() {
 }
 
 /**
- * Add related posts functionality
+ * Get related posts based on categories and tags
  */
-function technama_get_related_posts($count = 3) {
-    if (!is_single()) return array();
+function technama_get_related_posts($post_id = null, $count = 3) {
+    if (!$post_id) $post_id = get_the_ID();
 
-    global $post;
-    $categories = get_the_category($post->ID);
-    if (empty($categories)) return array();
+    $categories = get_the_category($post_id);
+    $tags = get_the_tags($post_id);
 
-    $cat_ids = array();
-    foreach ($categories as $category) {
-        $cat_ids[] = $category->term_id;
-    }
+    $cat_ids = !empty($categories) ? array_column($categories, 'term_id') : array();
+    $tag_ids = !empty($tags) ? array_column($tags, 'term_id') : array();
 
     $args = array(
-        'category__in'       => $cat_ids,
-        'post__not_in'       => array($post->ID),
-        'posts_per_page'     => $count,
-        'orderby'            => 'rand',
-        'ignore_sticky_posts' => 1,
+        'post__not_in'   => array($post_id),
+        'posts_per_page' => $count,
+        'post_status'    => 'publish',
     );
 
-    return get_posts($args);
+    if (!empty($cat_ids)) {
+        $args['category__in'] = $cat_ids;
+    }
+
+    if (!empty($tag_ids)) {
+        $args['tag__in'] = $tag_ids;
+    }
+
+    return new WP_Query($args);
 }
 
 /**
- * Get trending posts
+ * Get trending posts (by comment count + view count)
  */
 function technama_get_trending_posts($count = 5) {
-    $args = array(
-        'posts_per_page'     => $count,
-        'meta_key'           => 'post_views_count',
-        'orderby'            => 'meta_value_num',
-        'order'              => 'DESC',
-        'ignore_sticky_posts' => 1,
-        'date_query'         => array(
+    return new WP_Query(array(
+        'posts_per_page' => $count,
+        'post_status'    => 'publish',
+        'orderby'        => array(
+            'comment_count' => 'DESC',
+            'date'          => 'DESC',
+        ),
+        'order'          => 'DESC',
+        'date_query'     => array(
             array(
                 'after' => '30 days ago',
             ),
         ),
-    );
-
-    $trending = get_posts($args);
-    if (empty($trending)) {
-        $args = array(
-            'posts_per_page'     => $count,
-            'orderby'            => 'comment_count',
-            'order'              => 'DESC',
-            'ignore_sticky_posts' => 1,
-        );
-        $trending = get_posts($args);
-    }
-    return $trending;
+    ));
 }
 
 /**
@@ -351,6 +463,30 @@ function technama_track_post_view() {
 }
 add_action('wp_ajax_technama_track_view', 'technama_track_post_view');
 add_action('wp_ajax_nopriv_technama_track_view', 'technama_track_post_view');
+
+/**
+ * Track post views
+ */
+function technama_track_post_views() {
+    if (!is_single()) return;
+    if (is_user_logged_in()) return;
+
+    global $post;
+    $post_id = $post->ID;
+    $count = get_post_meta($post_id, 'tn_post_views', true);
+    if (!$count) $count = 0;
+    update_post_meta($post_id, 'tn_post_views', $count + 1);
+}
+add_action('wp_head', 'technama_track_post_views');
+
+/**
+ * Get post views
+ */
+function technama_get_post_views($post_id = null) {
+    if (!$post_id) $post_id = get_the_ID();
+    $count = get_post_meta($post_id, 'tn_post_views', true);
+    return $count ? intval($count) : 0;
+}
 
 /**
  * AJAX search handler
@@ -545,6 +681,103 @@ function technama_article_schema() {
 add_action('wp_head', 'technama_article_schema', 5);
 
 /**
+ * Custom registration fields
+ */
+function technama_registration_fields() {
+    ?>
+    <p>
+        <label for="first_name"><?php _e('First Name', 'technama'); ?></label>
+        <input type="text" name="first_name" id="first_name" class="input" value="<?php echo isset($_POST['first_name']) ? esc_attr($_POST['first_name']) : ''; ?>" />
+    </p>
+    <p>
+        <label for="last_name"><?php _e('Last Name', 'technama'); ?></label>
+        <input type="text" name="last_name" id="last_name" class="input" value="<?php echo isset($_POST['last_name']) ? esc_attr($_POST['last_name']) : ''; ?>" />
+    </p>
+    <?php
+}
+add_action('register_form', 'technama_registration_fields');
+
+function technama_registration_save($user_id) {
+    if (isset($_POST['first_name'])) {
+        update_user_meta($user_id, 'first_name', sanitize_text_field($_POST['first_name']));
+    }
+    if (isset($_POST['last_name'])) {
+        update_user_meta($user_id, 'last_name', sanitize_text_field($_POST['last_name']));
+    }
+}
+add_action('user_register', 'technama_registration_save');
+
+/**
+ * Bookmark/Unbookmark posts (AJAX)
+ */
+function technama_toggle_bookmark() {
+    check_ajax_referer('technama_nonce', 'nonce');
+    
+    if (!is_user_logged_in()) {
+        wp_send_json_error(array('message' => 'Please login to bookmark posts.'));
+    }
+    
+    $user_id = get_current_user_id();
+    $post_id = intval($_POST['post_id']);
+    $bookmarked = get_user_meta($user_id, 'tn_bookmarks', true);
+    
+    if (!is_array($bookmarked)) $bookmarked = array();
+    
+    if (in_array($post_id, $bookmarked)) {
+        $bookmarked = array_diff($bookmarked, array($post_id));
+        $action = 'removed';
+    } else {
+        $bookmarked[] = $post_id;
+        $action = 'added';
+    }
+    
+    update_user_meta($user_id, 'tn_bookmarks', array_values($bookmarked));
+    wp_send_json_success(array('action' => $action, 'count' => count($bookmarked)));
+}
+add_action('wp_ajax_tn_toggle_bookmark', 'technama_toggle_bookmark');
+add_action('wp_ajax_nopriv_tn_toggle_bookmark', 'technama_toggle_bookmark');
+
+/**
+ * Newsletter subscription (AJAX)
+ */
+function technama_newsletter_subscribe() {
+    check_ajax_referer('technama_nonce', 'nonce');
+    
+    $email = sanitize_email($_POST['email']);
+    if (!is_email($email)) {
+        wp_send_json_error(array('message' => 'Please enter a valid email address.'));
+    }
+    
+    global $wpdb;
+    $table = $wpdb->prefix . 'newsletter_subscribers';
+    
+    $existing = $wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE email = %s", $email));
+    
+    if ($existing) {
+        $wpdb->update($table, array('status' => 'active'), array('email' => $email));
+        wp_send_json_success(array('message' => 'Welcome back! You are now subscribed.'));
+    } else {
+        $wpdb->insert($table, array(
+            'email' => $email,
+            'status' => 'active',
+            'consent_date' => current_time('mysql'),
+        ));
+        wp_send_json_success(array('message' => 'Thank you for subscribing!'));
+    }
+}
+add_action('wp_ajax_tn_subscribe', 'technama_newsletter_subscribe');
+add_action('wp_ajax_nopriv_tn_subscribe', 'technama_newsletter_subscribe');
+
+/**
+ * Get user bookmarks count
+ */
+function technama_get_bookmark_count() {
+    if (!is_user_logged_in()) return 0;
+    $bookmarks = get_user_meta(get_current_user_id(), 'tn_bookmarks', true);
+    return is_array($bookmarks) ? count($bookmarks) : 0;
+}
+
+/**
  * Get the primary category name for a post
  */
 function technama_get_primary_category() {
@@ -554,3 +787,83 @@ function technama_get_primary_category() {
     }
     return '';
 }
+
+/**
+ * Press Release Submission Handler
+ */
+function technama_handle_press_release() {
+    if (!isset($_POST['tn_press_release_submit'])) return;
+    
+    check_admin_referer('tn_press_release_nonce');
+    
+    $title = sanitize_text_field($_POST['pr_title']);
+    $content = wp_kses_post($_POST['pr_content']);
+    $organization = sanitize_text_field($_POST['pr_organization']);
+    $contact_name = sanitize_text_field($_POST['pr_contact_name']);
+    $contact_email = sanitize_email($_POST['pr_contact_email']);
+    $contact_phone = sanitize_text_field($_POST['pr_contact_phone']);
+    
+    $post_id = wp_insert_post(array(
+        'post_title'   => $title,
+        'post_content' => $content,
+        'post_status'  => 'pending',
+        'post_type'    => 'press_release',
+    ));
+    
+    if ($post_id && !is_wp_error($post_id)) {
+        update_post_meta($post_id, 'pr_organization', $organization);
+        update_post_meta($post_id, 'pr_contact_name', $contact_name);
+        update_post_meta($post_id, 'pr_contact_email', $contact_email);
+        update_post_meta($post_id, 'pr_contact_phone', $contact_phone);
+        update_post_meta($post_id, 'pr_submission_date', current_time('mysql'));
+        update_post_meta($post_id, 'pr_status', 'submitted');
+        
+        if (!empty($_FILES['pr_attachments']['name'][0])) {
+            require_once(ABSPATH . 'wp-admin/includes/image.php');
+            require_once(ABSPATH . 'wp-admin/includes/file.php');
+            require_once(ABSPATH . 'wp-admin/includes/media.php');
+            
+            $files = $_FILES['pr_attachments'];
+            $file_count = count($files['name']);
+            
+            for ($i = 0; $i < $file_count; $i++) {
+                if ($files['error'][$i] === UPLOAD_ERR_OK) {
+                    $file_array = array(
+                        'name'     => $files['name'][$i],
+                        'tmp_name' => $files['tmp_name'][$i],
+                        'size'     => $files['size'][$i],
+                        'type'     => $files['type'][$i],
+                        'error'    => $files['error'][$i],
+                    );
+                    $_FILES['pr_attachment'] = $file_array;
+                    $attachment_id = media_handle_upload('pr_attachment', $post_id);
+                    if (!is_wp_error($attachment_id)) {
+                        $existing = get_post_meta($post_id, 'pr_attachments', true);
+                        if (!is_array($existing)) $existing = array();
+                        $existing[] = $attachment_id;
+                        update_post_meta($post_id, 'pr_attachments', $existing);
+                    }
+                }
+            }
+        }
+        
+        wp_mail(
+            get_option('admin_email'),
+            sprintf('[%s] New Press Release Submission: %s', get_bloginfo('name'), $title),
+            sprintf(
+                "A new press release has been submitted.\n\nOrganization: %s\nContact: %s (%s)\nPhone: %s\nTitle: %s\n\nReview at: %s",
+                $organization,
+                $contact_name,
+                $contact_email,
+                $contact_phone,
+                $title,
+                admin_url('post.php?post=' . $post_id . '&action=edit')
+            ),
+            array('Content-Type: text/plain; charset=UTF-8')
+        );
+        
+        wp_redirect(add_query_arg('pr_submitted', '1', wp_get_referer()));
+        exit;
+    }
+}
+add_action('init', 'technama_handle_press_release');
