@@ -1,0 +1,40 @@
+services:
+  technama-mysql:
+    image: mysql:8.0
+    container_name: technama-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - technama_mysql_data:/var/lib/mysql
+    networks:
+      - pilotron-net
+    command: --default-authentication-plugin=mysql_native_password
+
+  technama-wordpress:
+    image: wordpress:6.7-php8.1-apache
+    container_name: technama-wordpress
+    restart: always
+    depends_on:
+      - technama-mysql
+    environment:
+      WORDPRESS_DB_HOST: technama-mysql:3306
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DEBUG: "false"
+    volumes:
+      - technama_wp_content:/var/www/html
+    networks:
+      - pilotron-net
+
+volumes:
+  technama_mysql_data:
+  technama_wp_content:
+
+networks:
+  pilotron-net:
+    external: true

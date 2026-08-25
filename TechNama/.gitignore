@@ -1,0 +1,12 @@
+wp-content/plugins/
+wp-content/uploads/
+wp-content/cache/
+wp-content/upgrade/
+.env
+ssl/
+*.pem
+*.key
+.DS_Store
+Thumbs.db
+*.log
+backups/

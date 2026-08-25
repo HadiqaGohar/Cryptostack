@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" width="280" height="60">
+  <defs>
+    <linearGradient id="tn-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#37215F"/>
+      <stop offset="100%" stop-color="#0881BE"/>
+    </linearGradient>
+  </defs>
+  <!-- Tech text in purple -->
+  <text x="0" y="44" font-family="'Poppins', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="42" font-weight="800" letter-spacing="-1" fill="#37215F">Tech</text>
+  <!-- Nama text in blue -->
+  <text x="119" y="44" font-family="'Poppins', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="42" font-weight="800" letter-spacing="-1" fill="#0881BE">Nama</text>
+  <!-- Subtle accent line -->
+  <rect x="0" y="52" width="230" height="3" rx="1.5" fill="url(#tn-gradient)" opacity="0.6"/>
+</svg>

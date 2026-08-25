@@ -1,0 +1,137 @@
+<?php
+/**
+ * TechNama Custom Post Types
+ */
+
+if (!defined('ABSPATH')) exit;
+
+/**
+ * Register Custom Post Types
+ */
+function technama_register_post_types() {
+    // Video Reviews CPT
+    register_post_type('video_review', array(
+        'labels' => array(
+            'name'               => __('Video Reviews', 'technama'),
+            'singular_name'      => __('Video Review', 'technama'),
+            'add_new_item'       => __('Add New Video Review', 'technama'),
+            'edit_item'          => __('Edit Video Review', 'technama'),
+            'all_items'          => __('All Video Reviews', 'technama'),
+            'view_item'          => __('View Video Review', 'technama'),
+            'search_items'       => __('Search Video Reviews', 'technama'),
+            'not_found'          => __('No video reviews found.', 'technama'),
+            'menu_name'          => __('Video Reviews', 'technama'),
+        ),
+        'public'             => true,
+        'has_archive'        => true,
+        'rewrite'            => array('slug' => 'video-reviews'),
+        'supports'           => array('title', 'editor', 'thumbnail', 'excerpt', 'comments', 'custom-fields'),
+        'menu_icon'          => 'dashicons-video-alt3',
+        'show_in_rest'       => true,
+        'capability_type'    => 'post',
+        'map_meta_cap'       => true,
+    ));
+
+    // Deals CPT
+    register_post_type('deals', array(
+        'labels' => array(
+            'name'               => __('Deals', 'technama'),
+            'singular_name'      => __('Deal', 'technama'),
+            'add_new_item'       => __('Add New Deal', 'technama'),
+            'edit_item'          => __('Edit Deal', 'technama'),
+            'all_items'          => __('All Deals', 'technama'),
+            'view_item'          => __('View Deal', 'technama'),
+            'search_items'       => __('Search Deals', 'technama'),
+            'not_found'          => __('No deals found.', 'technama'),
+            'menu_name'          => __('Deals', 'technama'),
+        ),
+        'public'             => true,
+        'has_archive'        => true,
+        'rewrite'            => array('slug' => 'deals'),
+        'supports'           => array('title', 'editor', 'thumbnail', 'excerpt', 'custom-fields'),
+        'menu_icon'          => 'dashicons-tag',
+        'show_in_rest'       => true,
+    ));
+
+    // Reviews CPT
+    register_post_type('reviews', array(
+        'labels' => array(
+            'name'               => __('Reviews', 'technama'),
+            'singular_name'      => __('Review', 'technama'),
+            'add_new_item'       => __('Add New Review', 'technama'),
+            'edit_item'          => __('Edit Review', 'technama'),
+            'all_items'          => __('All Reviews', 'technama'),
+            'view_item'          => __('View Review', 'technama'),
+            'search_items'       => __('Search Reviews', 'technama'),
+            'not_found'          => __('No reviews found.', 'technama'),
+            'menu_name'          => __('Reviews', 'technama'),
+        ),
+        'public'             => true,
+        'has_archive'        => true,
+        'rewrite'            => array('slug' => 'reviews'),
+        'supports'           => array('title', 'editor', 'thumbnail', 'excerpt', 'comments', 'custom-fields'),
+        'menu_icon'          => 'dashicons-star-half',
+        'show_in_rest'       => true,
+    ));
+}
+add_action('init', 'technama_register_post_types');
+
+/**
+ * Register Custom Taxonomies
+ */
+function technama_register_taxonomies() {
+    // Tech Topics Taxonomy
+    register_taxonomy('tech_topic', array('post', 'video_review', 'reviews'), array(
+        'labels' => array(
+            'name'              => __('Tech Topics', 'technama'),
+            'singular_name'     => __('Tech Topic', 'technama'),
+            'search_items'      => __('Search Tech Topics', 'technama'),
+            'all_items'         => __('All Tech Topics', 'technama'),
+            'parent_item'       => __('Parent Tech Topic', 'technama'),
+            'parent_item_colon' => __('Parent Tech Topic:', 'technama'),
+            'edit_item'         => __('Edit Tech Topic', 'technama'),
+            'update_item'       => __('Update Tech Topic', 'technama'),
+            'add_new_item'      => __('Add New Tech Topic', 'technama'),
+            'new_item_name'     => __('New Tech Topic Name', 'technama'),
+            'menu_name'         => __('Tech Topics', 'technama'),
+        ),
+        'hierarchical'      => true,
+        'public'            => true,
+        'show_ui'           => true,
+        'show_admin_column' => true,
+        'show_in_rest'      => true,
+        'rewrite'           => array('slug' => 'tech-topic'),
+    ));
+
+    // Brand Taxonomy for deals and reviews
+    register_taxonomy('brand', array('deals', 'reviews'), array(
+        'labels' => array(
+            'name'              => __('Brands', 'technama'),
+            'singular_name'     => __('Brand', 'technama'),
+            'search_items'      => __('Search Brands', 'technama'),
+            'all_items'         => __('All Brands', 'technama'),
+            'edit_item'         => __('Edit Brand', 'technama'),
+            'update_item'       => __('Update Brand', 'technama'),
+            'add_new_item'      => __('Add New Brand', 'technama'),
+            'new_item_name'     => __('New Brand Name', 'technama'),
+            'menu_name'         => __('Brands', 'technama'),
+        ),
+        'hierarchical'      => true,
+        'public'            => true,
+        'show_ui'           => true,
+        'show_admin_column' => true,
+        'show_in_rest'      => true,
+        'rewrite'           => array('slug' => 'brand'),
+    ));
+}
+add_action('init', 'technama_register_taxonomies');
+
+/**
+ * Flush rewrite rules on theme activation
+ */
+function technama_rewrite_flush() {
+    technama_register_post_types();
+    technama_register_taxonomies();
+    flush_rewrite_rules();
+}
+add_action('after_switch_theme', 'technama_rewrite_flush');
