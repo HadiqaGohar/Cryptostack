@@ -866,4 +866,80 @@ function technama_handle_press_release() {
         exit;
     }
 }
+/**
+ * Optimize images on upload
+ */
+function technama_optimize_image($jpg_quality) {
+    return 82;
+}
+add_filter('jpeg_quality', 'technama_optimize_image');
+
+/**
+ * Add lazy loading to images
+ */
+function technama_lazy_load_images($content) {
+    if (is_admin()) return $content;
+    $content = str_replace('<img ', '<img loading="lazy" ', $content);
+    return $content;
+}
+add_filter('the_content', 'technama_lazy_load_images');
+add_filter('wp_get_attachment_image_attributes', function($attr) {
+    $attr['loading'] = 'lazy';
+    return $attr;
+});
+
+/**
+ * YouTube oEmbed handler
+ */
+function technama_youtube_embed($url_or_id, $width = '100%', $height = '400') {
+    if (strlen($url_or_id) === 11 && !preg_match('/^https?:\/\//', $url_or_id)) {
+        $url = 'https://www.youtube.com/watch?v=' . $url_or_id;
+    } else {
+        $url = $url_or_id;
+    }
+    
+    $embed = wp_oembed_get($url, array(
+        'width'  => $width,
+        'height' => $height,
+    ));
+    
+    if ($embed) {
+        return '<div class="tn-video-embed">' . $embed . '</div>';
+    }
+    
+    return '<div class="tn-video-fallback"><p>Video not available</p></div>';
+}
+
+/**
+ * Get YouTube thumbnail from video ID
+ */
+function technama_youtube_thumbnail($video_id, $quality = 'maxresdefault') {
+    return "https://img.youtube.com/vi/{$video_id}/{$quality}.jpg";
+}
+
+/**
+ * Get video duration from YouTube (requires API key)
+ */
+function technama_youtube_duration($video_id) {
+    $api_key = get_option('technama_youtube_api_key', '');
+    if (empty($api_key)) return '';
+    
+    $response = wp_remote_get("https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id={$video_id}&key={$api_key}");
+    if (is_wp_error($response)) return '';
+    
+    $data = json_decode(wp_remote_retrieve_body($response), true);
+    if (empty($data['items'][0]['contentDetails']['duration'])) return '';
+    
+    $duration = $data['items'][0]['contentDetails']['duration'];
+    preg_match('/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/', $duration, $matches);
+    $hours = isset($matches[1]) ? $matches[1] : 0;
+    $minutes = isset($matches[2]) ? $matches[2] : 0;
+    $seconds = isset($matches[3]) ? $matches[3] : 0;
+    
+    if ($hours > 0) {
+        return sprintf('%d:%02d:%02d', $hours, $minutes, $seconds);
+    }
+    return sprintf('%d:%02d', $minutes, $seconds);
+}
+
 add_action('init', 'technama_handle_press_release');
