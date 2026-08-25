@@ -543,3 +543,14 @@ function technama_article_schema() {
     }
 }
 add_action('wp_head', 'technama_article_schema', 5);
+
+/**
+ * Get the primary category name for a post
+ */
+function technama_get_primary_category() {
+    $categories = get_the_category();
+    if (!empty($categories)) {
+        return $categories[0]->name;
+    }
+    return '';
+}
