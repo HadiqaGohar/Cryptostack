@@ -252,3 +252,26 @@ function technama_enqueue_editor_assets() {
     );
 }
 add_action('enqueue_block_editor_assets', 'technama_enqueue_editor_assets');
+
+/**
+ * Output Google Analytics gtag.js in <head>
+ */
+function technama_google_analytics() {
+    $ga_id = get_theme_mod('technama_ga_measurement_id', '');
+    if (empty($ga_id)) {
+        return;
+    }
+    $ga_id = esc_attr($ga_id);
+    ?>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo $ga_id; ?>"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '<?php echo $ga_id; ?>');
+</script>
+<!-- End Google Analytics -->
+    <?php
+}
+add_action('wp_head', 'technama_google_analytics', 1);

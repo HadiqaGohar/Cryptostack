@@ -120,6 +120,31 @@ get_header();
     </section>
     <?php endif; ?>
 
+    <?php
+    $live_video_id = get_theme_mod('technama_live_video_id', '');
+    if (!empty($live_video_id)) :
+    ?>
+    <section class="tn-live-stream" aria-label="<?php esc_attr_e('Live Stream', 'technama'); ?>">
+        <div class="container">
+            <div class="section-header">
+                <h2><?php esc_html_e('Live Stream', 'technama'); ?></h2>
+            </div>
+            <div class="tn-live-stream-wrapper">
+                <div class="tn-live-stream-video">
+                    <iframe
+                        src="https://www.youtube.com/embed/<?php echo esc_attr($live_video_id); ?>?autoplay=0&rel=0"
+                        title="<?php esc_attr_e('Live Stream', 'technama'); ?>"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                        loading="lazy">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
     <div class="container">
         <div class="tn-homepage-layout">
 
@@ -184,12 +209,18 @@ get_header();
                     <?php wp_reset_postdata(); ?>
                 </section>
 
+                <?php if (is_active_sidebar('homepage-below-hero')) : ?>
+                <section class="sponsor-banner-area sponsor-mid-content" aria-label="<?php esc_attr_e('Sponsored', 'technama'); ?>">
+                    <?php dynamic_sidebar('homepage-below-hero'); ?>
+                </section>
+                <?php endif; ?>
+
                 <?php
                 $startup_args = array(
                     'posts_per_page'      => 4,
                     'post_status'         => 'publish',
                     'ignore_sticky_posts' => 1,
-                    'category_name'       => 'startup',
+                    'category_name'       => 'startups',
                 );
                 $startup_query = new WP_Query($startup_args);
 
@@ -198,7 +229,7 @@ get_header();
                 <section class="tn-startup-showcase" aria-label="<?php esc_attr_e('Startup Showcase', 'technama'); ?>">
                     <div class="section-header">
                         <h2><?php esc_html_e('Startup Showcase', 'technama'); ?></h2>
-                        <?php $startup_cat_id = get_cat_ID('startup'); ?>
+                        <?php $startup_cat_id = get_cat_ID('Startups'); ?>
                         <?php if ($startup_cat_id && !is_wp_error($startup_cat_id)) : ?>
                             <a href="<?php echo esc_url(get_category_link($startup_cat_id)); ?>" class="view-all">
                                 <?php esc_html_e('View All', 'technama'); ?>

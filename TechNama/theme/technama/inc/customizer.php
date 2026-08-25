@@ -209,6 +209,18 @@ function technama_customize_register($wp_customize) {
         'type'    => 'checkbox',
     ));
 
+    // Live stream YouTube video ID
+    $wp_customize->add_setting('technama_live_video_id', array(
+        'default'           => '',
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+    $wp_customize->add_control('technama_live_video_id', array(
+        'label'       => __('YouTube Video ID for Live Stream', 'technama'),
+        'description' => __('Enter just the YouTube video ID (e.g. dQw4w9WgXcQ). Leave empty to hide.', 'technama'),
+        'section'     => 'technama_homepage',
+        'type'        => 'text',
+    ));
+
     // Enable deals section
     $wp_customize->add_setting('technama_show_deals_section', array(
         'default'           => true,
@@ -331,6 +343,24 @@ function technama_customize_register($wp_customize) {
         'label'   => __('Newsletter Widget Description', 'technama'),
         'section' => 'technama_newsletter',
         'type'    => 'textarea',
+    ));
+
+    // Analytics Section
+    $wp_customize->add_section('technama_analytics', array(
+        'title'    => __('Analytics', 'technama'),
+        'panel'    => 'technama_panel',
+        'priority' => 99,
+    ));
+
+    $wp_customize->add_setting('technama_ga_measurement_id', array(
+        'default'           => '',
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+    $wp_customize->add_control('technama_ga_measurement_id', array(
+        'label'       => __('Google Analytics Measurement ID', 'technama'),
+        'description' => __('e.g. G-XXXXXXXXXX or UA-XXXXXXXX-X. Leave empty to disable.', 'technama'),
+        'section'     => 'technama_analytics',
+        'type'        => 'text',
     ));
 }
 add_action('customize_register', 'technama_customize_register');
