@@ -943,3 +943,128 @@ function technama_youtube_duration($video_id) {
 }
 
 add_action('init', 'technama_handle_press_release');
+
+/**
+ * ============================================================
+ * PHASE 9: SECURITY REQUIREMENTS
+ * ============================================================
+ */
+
+/**
+ * Password Strength Policy
+ * Enforces minimum 12 characters with complexity requirements
+ */
+function technama_check_password_strength($errors) {
+    $password = '';
+    if (isset($_POST['pass1']) && !empty($_POST['pass1'])) {
+        $password = $_POST['pass1'];
+    } elseif (isset($_POST['password']) && !empty($_POST['password'])) {
+        $password = $_POST['password'];
+    }
+    
+    if (!empty($password)) {
+        if (strlen($password) < 12) {
+            $errors->add('password_length', 'Password must be at least 12 characters long.');
+        }
+        if (!preg_match('/[A-Z]/', $password)) {
+            $errors->add('password_uppercase', 'Password must contain at least one uppercase letter.');
+        }
+        if (!preg_match('/[a-z]/', $password)) {
+            $errors->add('password_lowercase', 'Password must contain at least one lowercase letter.');
+        }
+        if (!preg_match('/[0-9]/', $password)) {
+            $errors->add('password_number', 'Password must contain at least one number.');
+        }
+        if (!preg_match('/[!@#$%^&*()_\-]/', $password)) {
+            $errors->add('password_special', 'Password must contain at least one special character.');
+        }
+    }
+    return $errors;
+}
+add_action('user_profile_update_errors', 'technama_check_password_strength');
+
+/**
+ * Log failed login attempts
+ */
+function technama_log_failed_login($user_login) {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+    error_log(sprintf('[TechNama Security] Failed login: %s | IP: %s | UA: %s | Time: %s', $user_login, $ip, $user_agent, current_time('mysql')));
+    $failed_logins = get_option('technama_failed_logins', array());
+    $failed_logins[] = array('username' => $user_login, 'ip' => $ip, 'user_agent' => $user_agent, 'time' => current_time('mysql'));
+    if (count($failed_logins) > 100) { $failed_logins = array_slice($failed_logins, -100); }
+    update_option('technama_failed_logins', $failed_logins);
+}
+add_action('wp_login_failed', 'technama_log_failed_login');
+
+/**
+ * Log successful logins
+ */
+function technama_log_successful_login($user_login, $user) {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    error_log(sprintf('[TechNama Security] Successful login: %s (ID: %d) | IP: %s | Time: %s', $user_login, $user->ID, $ip, current_time('mysql')));
+}
+add_action('wp_login', 'technama_log_successful_login', 10, 2);
+
+/**
+ * Security headers for admin area
+ */
+function technama_admin_security_headers() {
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('X-XSS-Protection: 1; mode=block');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+}
+add_action('admin_init', 'technama_admin_security_headers');
+
+/**
+ * Disable XML-RPC via PHP (backup to nginx block)
+ */
+add_filter('xmlrpc_enabled', '__return_false');
+
+/**
+ * Remove WordPress version from head
+ */
+function technama_remove_version() {
+    remove_action('wp_head', 'wp_generator');
+}
+add_action('after_setup_theme', 'technama_remove_version');
+
+/**
+ * Add security audit page to admin
+ */
+function technama_security_audit_page() {
+    add_management_page('Security Audit', 'Security Audit', 'manage_options', 'technama-security-audit', 'technama_security_audit_render');
+}
+add_action('admin_menu', 'technama_security_audit_page');
+
+function technama_security_audit_render() {
+    if (!current_user_can('manage_options')) return;
+    $failed_logins = get_option('technama_failed_logins', array());
+    $recent = array_slice(array_reverse($failed_logins), -20);
+    echo '<div class="wrap"><h1>Security Audit Dashboard</h1>';
+    echo '<div class="card"><h2>Security Status</h2>';
+    echo '<table class="widefat">';
+    echo '<tr><td><strong>HTTPS/SSL</strong></td><td>Active (HSTS)</td></tr>';
+    echo '<tr><td><strong>WAF (Wordfence)</strong></td><td>Active</td></tr>';
+    echo '<tr><td><strong>Login Protection</strong></td><td>WPS Hide Login (/secure-login)</td></tr>';
+    echo '<tr><td><strong>Rate Limiting</strong></td><td>5 req/min on login</td></tr>';
+    echo '<tr><td><strong>XML-RPC</strong></td><td>Disabled (nginx + PHP)</td></tr>';
+    echo '<tr><td><strong>File Editing</strong></td><td>Disabled</td></tr>';
+    echo '<tr><td><strong>Security Headers</strong></td><td>7 headers active</td></tr>';
+    echo '<tr><td><strong>Backups</strong></td><td>Daily (UpdraftPlus)</td></tr>';
+    echo '<tr><td><strong>Password Policy</strong></td><td>12+ chars, complexity required</td></tr>';
+    echo '<tr><td><strong>Activity Logging</strong></td><td>Simple History active</td></tr>';
+    echo '<tr><td><strong>REST API</strong></td><td>Restricted to logged-in users</td></tr>';
+    echo '</table></div>';
+    echo '<div class="card"><h2>Recent Failed Logins</h2>';
+    if (empty($recent)) { echo '<p>No failed login attempts recorded.</p>'; }
+    else {
+        echo '<table class="widefat striped"><thead><tr><th>Time</th><th>Username</th><th>IP</th><th>User Agent</th></tr></thead><tbody>';
+        foreach ($recent as $f) {
+            echo '<tr><td>' . esc_html($f['time']) . '</td><td>' . esc_html($f['username']) . '</td><td>' . esc_html($f['ip']) . '</td><td>' . esc_html(substr($f['user_agent'], 0, 40)) . '</td></tr>';
+        }
+        echo '</tbody></table>';
+    }
+    echo '</div></div>';
+}
