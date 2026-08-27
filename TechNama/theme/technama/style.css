@@ -1043,3 +1043,55 @@ select.tn-form-control { appearance: auto; }
 .tn-empty-state { text-align: center; padding: 4rem 1.5rem; }
 .tn-empty-state h2 { font-size: 1.75rem; color: #495057; margin-bottom: 1rem; }
 .tn-empty-state p { font-size: 1rem; color: #6c757d; margin-bottom: 1.5rem; }
+
+/* ============================================================
+   PHASE 10: ADSENSE & AD STYLES
+   ============================================================ */
+
+.tn-ad-slot {
+    margin: 20px 0;
+    text-align: center;
+    background: #f8f9fa;
+    border-radius: 4px;
+    padding: 10px;
+    min-height: 50px;
+}
+
+.tn-ad-slot:empty {
+    display: none;
+}
+
+.tn-ad-inarticle {
+    margin: 30px auto;
+    max-width: 728px;
+}
+
+.tn-ad-sidebar {
+    margin: 20px 0;
+}
+
+.tn-ad-header {
+    margin: 0 auto;
+    max-width: 728px;
+}
+
+.tn-ad-footer {
+    margin: 0 auto;
+    max-width: 728px;
+}
+
+.tn-ad-label {
+    font-size: 10px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+@media (max-width: 768px) {
+    .tn-ad-inarticle,
+    .tn-ad-header,
+    .tn-ad-footer {
+        max-width: 100%;
+    }
+}
