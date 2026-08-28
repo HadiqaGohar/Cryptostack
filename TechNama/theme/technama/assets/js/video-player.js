@@ -244,14 +244,14 @@
       var state = stateMap[String(event.data)] || 'unknown';
       container.setAttribute('data-player-state', state);
 
-      var event = new CustomEvent('tn-video-state-change', {
+      var customEvent = new CustomEvent('tn-video-state-change', {
         detail: {
           container: container,
           state: state,
           videoId: container.getAttribute('data-youtube-id')
         }
       });
-      container.dispatchEvent(event);
+      container.dispatchEvent(customEvent);
     }
   };
 })();

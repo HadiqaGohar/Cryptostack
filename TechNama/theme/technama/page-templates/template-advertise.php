@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tn_advertise_nonce'])
         if (empty($ad_form['ad_message'])) $ad_errors[] = __('Please tell us about your advertising goals.', 'technama');
 
         if (empty($ad_errors)) {
-            $to = 'ads@technama.com';
+            $to = get_option('admin_email');
             $email_subject = sprintf('[%s] Advertising Inquiry from %s', get_bloginfo('name'), $ad_form['advertiser_company']);
             $email_body = sprintf(
                 "New advertising inquiry:\n\nName: %s\nEmail: %s\nCompany: %s\nBudget: %s\n\nMessage:\n%s",

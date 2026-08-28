@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (empty($reg_username)) $register_error = __('Username is required.', 'technama');
             elseif (empty($reg_email) || !is_email($reg_email)) $register_error = __('A valid email is required.', 'technama');
-            elseif (strlen($reg_password) < 8) $register_error = __('Password must be at least 8 characters.', 'technama');
+            elseif (strlen($reg_password) < 12) $register_error = __('Password must be at least 12 characters.', 'technama');
             elseif ($reg_password !== $reg_confirm) $register_error = __('Passwords do not match.', 'technama');
             elseif (username_exists($reg_username)) $register_error = __('Username already taken.', 'technama');
             elseif (email_exists($reg_email)) $register_error = __('Email already registered.', 'technama');
@@ -179,6 +179,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <button type="submit" class="tn-btn tn-btn-primary"><?php esc_html_e('Save Changes', 'technama'); ?></button>
                     </div>
                 </form>
+                <?php
+                if ( isset( $_POST['tn_profile_nonce'] ) && wp_verify_nonce( $_POST['tn_profile_nonce'], 'tn_profile_update' ) ) {
+                    $user_id = get_current_user_id();
+                    if ( $user_id ) {
+                        if ( isset( $_POST['display_name'] ) ) {
+                            wp_update_user( array( 'ID' => $user_id, 'display_name' => sanitize_text_field( $_POST['display_name'] ) ) );
+                        }
+                        if ( isset( $_POST['first_name'] ) ) {
+                            update_user_meta( $user_id, 'first_name', sanitize_text_field( $_POST['first_name'] ) );
+                        }
+                        if ( isset( $_POST['last_name'] ) ) {
+                            update_user_meta( $user_id, 'last_name', sanitize_text_field( $_POST['last_name'] ) );
+                        }
+                        if ( isset( $_POST['bio'] ) ) {
+                            update_user_meta( $user_id, 'description', sanitize_textarea_field( $_POST['bio'] ) );
+                        }
+                        echo '<div class="tn-alert tn-alert-success">' . esc_html__( 'Profile updated successfully!', 'technama' ) . '</div>';
+                    }
+                }
+                ?>
             </div>
         </div>
     </div>
@@ -246,8 +266,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     <div class="tn-form-group">
                         <label for="reg_password"><?php esc_html_e('Password', 'technama'); ?></label>
-                        <input type="password" id="reg_password" name="reg_password" class="tn-form-control" required autocomplete="new-password" minlength="8">
-                        <small class="tn-form-help"><?php esc_html_e('Minimum 8 characters', 'technama'); ?></small>
+                        <input type="password" id="reg_password" name="reg_password" class="tn-form-control" required autocomplete="new-password" minlength="12">
+                        <small class="tn-form-help"><?php esc_html_e('Minimum 12 characters with uppercase, number, and symbol', 'technama'); ?></small>
                     </div>
                     <div class="tn-form-group">
                         <label for="reg_confirm_password"><?php esc_html_e('Confirm Password', 'technama'); ?></label>
@@ -256,7 +276,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="tn-form-group">
                         <label class="tn-checkbox-label">
                             <input type="checkbox" required>
-                            <?php printf(esc_html__('I agree to the %sTerms of Service%s and %sPrivacy Policy%s', 'technama'), '<a href="' . esc_url(home_url('/terms/')) . '" target="_blank">', '</a>', '<a href="' . esc_url(home_url('/privacy/')) . '" target="_blank">', '</a>'); ?>
+                            <?php printf(esc_html__('I agree to the %sTerms of Service%s and %sPrivacy Policy%s', 'technama'), '<a href="' . esc_url(home_url('/terms-of-service/')) . '" target="_blank">', '</a>', '<a href="' . esc_url(home_url('/privacy-policy/')) . '" target="_blank">', '</a>'); ?>
                         </label>
                     </div>
                     <button type="submit" class="tn-btn tn-btn-primary tn-btn-block"><?php esc_html_e('Create Account', 'technama'); ?></button>

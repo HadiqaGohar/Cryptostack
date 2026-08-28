@@ -47,7 +47,7 @@
                             <?php endif; ?>
                             <div class="tn-sponsor-item-info">
                                 <h4 class="tn-sponsor-item-title"><?php the_title(); ?></h4>
-                                <span class="tn-sponsor-item-date"><?php echo get_the_date(); ?></span>
+                                <span class="tn-sponsor-item-date"><?php echo esc_html( get_the_date() ); ?></span>
                             </div>
                         </a>
                     </div>

@@ -4,6 +4,9 @@
  * 
  * @package TechNama
  */
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 get_header();
 
@@ -59,9 +62,9 @@ $share_count = technama_get_share_count();
                             
                             <?php if ($show_date) : ?>
                                 <span class="tn-meta-item">
-                                    📅 <?php echo esc_html(date('M j, Y', strtotime($show_date))); ?>
+                                    📅 <?php echo esc_html( $show_date ? date('M j, Y', strtotime($show_date)) : '' ); ?>
                                     <?php if ($show_time) : ?>
-                                        • <?php echo esc_html(date('g:i A', strtotime($show_time))); ?>
+                                        • <?php echo esc_html( $show_time ? date('g:i A', strtotime($show_time)) : '' ); ?>
                                     <?php endif; ?>
                                 </span>
                             <?php endif; ?>
@@ -70,7 +73,7 @@ $share_count = technama_get_share_count();
                                 <span class="tn-meta-item">⏱ <?php echo esc_html($duration); ?></span>
                             <?php endif; ?>
                             
-                            <span class="tn-meta-item">👁 <?php echo esc_html(number_format($views)); ?> views</span>
+                            <span class="tn-meta-item">👁 <?php echo esc_html( number_format( intval( $views ) ) ); ?> views</span>
                             <span class="tn-meta-item">🔗 <?php echo esc_html($share_count); ?> shares</span>
                         </div>
 

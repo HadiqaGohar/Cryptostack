@@ -1,7 +1,10 @@
 <?php
 /**
- * TechNama Header Template
+ * Header template for Technama theme.
  */
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -23,7 +26,7 @@
         <div class="tn-topbar">
             <div class="tn-container">
                 <div class="tn-topbar-left">
-                    <span class="tn-topbar-date"><?php echo date('l, F j, Y'); ?></span>
+                    <span class="tn-topbar-date"><?php echo esc_html( date('l, F j, Y') ); ?></span>
                 </div>
                 <div class="tn-topbar-right">
                     <nav class="tn-topbar-nav" aria-label="<?php esc_attr_e('Quick Links', 'technama'); ?>">
@@ -53,7 +56,7 @@ $social_youtube = get_theme_mod('technama_social_youtube', '');
                 <div class="tn-header-row">
                     <!-- Logo -->
                     <div class="tn-logo">
-                        <a href="<?php echo esc_url(home_url('/')); ?>" aria-label="<?php bloginfo('name'); ?>">
+                        <a href="<?php echo esc_url(home_url('/')); ?>" aria-label="<?php echo esc_attr( get_bloginfo('name') ); ?>">
                             <?php if (has_custom_logo()) : ?>
                                 <?php the_custom_logo(); ?>
                             <?php else : ?>
@@ -113,7 +116,7 @@ $social_youtube = get_theme_mod('technama_social_youtube', '');
     <div class="tn-search-overlay" id="tn-search-overlay">
         <div class="tn-container">
             <form role="search" method="get" class="tn-search-form" action="<?php echo esc_url(home_url('/')); ?>">
-                <input type="search" class="tn-search-input" placeholder="<?php esc_attr_e('Search articles, videos, startups...', 'technama'); ?>" value="<?php echo get_search_query(); ?>" name="s" />
+                <input type="search" class="tn-search-input" placeholder="<?php esc_attr_e('Search articles, videos, startups...', 'technama'); ?>" value="<?php echo esc_attr( get_search_query() ); ?>" name="s" />
                 <button type="submit" class="tn-search-submit" aria-label="<?php esc_attr_e('Search', 'technama'); ?>">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 </button>
@@ -144,9 +147,9 @@ $social_youtube = get_theme_mod('technama_social_youtube', '');
                     if ($breaking_news->have_posts()) :
                         while ($breaking_news->have_posts()) : $breaking_news->the_post();
                     ?>
-                    <a href="<?php the_permalink(); ?>" class="tn-ticker-item">
+                    <a href="<?php echo esc_url( get_permalink() ); ?>" class="tn-ticker-item">
                         <span class="tn-ticker-cat"><?php echo esc_html(technama_get_primary_category()); ?></span>
-                        <?php the_title(); ?>
+                        <?php echo esc_html( get_the_title() ); ?>
                     </a>
                     <?php
                         endwhile;

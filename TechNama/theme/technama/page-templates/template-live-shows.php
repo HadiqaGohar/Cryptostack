@@ -13,18 +13,18 @@ get_header();
     <!-- PAGE HEADER -->
     <section class="tn-page-header tn-page-header-shows">
         <div class="tn-container">
-            <h1 class="tn-page-title"><?php _e('Web Channel / Live Shows', 'technama'); ?></h1>
-            <p class="tn-page-subtitle"><?php _e('Watch live interviews with Pakistan\'s top startup founders and tech leaders', 'technama'); ?></p>
+            <h1 class="tn-page-title"><?php esc_html_e('Web Channel / Live Shows', 'technama'); ?></h1>
+            <p class="tn-page-subtitle"><?php esc_html_e('Watch live interviews with Pakistan\'s top startup founders and tech leaders', 'technama'); ?></p>
         </div>
     </section>
 
     <?php
-    // Enqueue show filters JS
-    wp_enqueue_script('technama-show-filters', get_stylesheet_directory_uri() . '/assets/js/show-filters.js', array(), '1.0.0', true);
-    wp_localize_script('technama-show-filters', 'tn_share_vars', array(
-        'ajax_url' => admin_url('admin-ajax.php'),
-        'nonce'    => wp_create_nonce('technama_nonce'),
-    ));
+    // Show filters JS is enqueued in inc/enqueue.php
+    // DISABLED: Duplicate - already localized in inc/enqueue.php
+    // wp_localize_script('technama-show-filters', 'tn_share_vars', array(
+    //     'ajax_url' => admin_url('admin-ajax.php'),
+    //     'nonce'    => wp_create_nonce('technama_nonce'),
+    // ));
     ?>
 
     <?php
@@ -38,7 +38,7 @@ get_header();
     <section class="tn-live-banner">
         <div class="tn-container">
             <div class="tn-live-indicator">
-                <span class="tn-live-dot"></span> <?php _e('LIVE NOW', 'technama'); ?>
+                <span class="tn-live-dot"></span> <?php esc_html_e('LIVE NOW', 'technama'); ?>
             </div>
             <?php if ($live_youtube) : ?>
                 <div class="tn-live-stream-wrapper">
@@ -57,7 +57,7 @@ get_header();
     ?>
     <section class="tn-upcoming-shows">
         <div class="tn-container">
-            <h2 class="tn-section-title">📅 <?php _e('Upcoming Shows', 'technama'); ?></h2>
+            <h2 class="tn-section-title">📅 <?php esc_html_e('Upcoming Shows', 'technama'); ?></h2>
             <div class="tn-calendar-list">
                 <?php
                 while ($upcoming->have_posts()) {
@@ -110,10 +110,10 @@ get_header();
     <section class="tn-show-filters-section">
         <div class="tn-container">
             <div class="tn-show-filters">
-                <button class="tn-filter-btn active" data-filter="all"><?php _e('All', 'technama'); ?></button>
-                <button class="tn-filter-btn" data-filter="episodes"><?php _e('Episodes', 'technama'); ?></button>
-                <button class="tn-filter-btn" data-filter="upcoming"><?php _e('Upcoming', 'technama'); ?></button>
-                <button class="tn-filter-btn" data-filter="live"><?php _e('Live', 'technama'); ?></button>
+                <button class="tn-filter-btn active" data-filter="all"><?php esc_html_e('All', 'technama'); ?></button>
+                <button class="tn-filter-btn" data-filter="episodes"><?php esc_html_e('Episodes', 'technama'); ?></button>
+                <button class="tn-filter-btn" data-filter="upcoming"><?php esc_html_e('Upcoming', 'technama'); ?></button>
+                <button class="tn-filter-btn" data-filter="live"><?php esc_html_e('Live', 'technama'); ?></button>
             </div>
         </div>
     </section>
@@ -145,8 +145,8 @@ get_header();
                 else :
                 ?>
                     <div class="tn-no-videos">
-                        <p><?php _e('No videos available yet.', 'technama'); ?></p>
-                        <p><?php _e('Stay tuned for upcoming live shows and interviews.', 'technama'); ?></p>
+                        <p><?php esc_html_e('No videos available yet.', 'technama'); ?></p>
+                        <p><?php esc_html_e('Stay tuned for upcoming live shows and interviews.', 'technama'); ?></p>
                     </div>
                 <?php endif; ?>
             </div>
@@ -166,11 +166,11 @@ get_header();
     <section class="tn-show-newsletter">
         <div class="tn-container tn-container-narrow">
             <div class="tn-newsletter-box">
-                <h2><?php _e('🔔 Never Miss a Show', 'technama'); ?></h2>
-                <p><?php _e('Subscribe to get notified about upcoming live shows and exclusive interviews.', 'technama'); ?></p>
+                <h2><?php esc_html_e('🔔 Never Miss a Show', 'technama'); ?></h2>
+                <p><?php esc_html_e('Subscribe to get notified about upcoming live shows and exclusive interviews.', 'technama'); ?></p>
                 <form class="tn-newsletter-form" data-ajax="tn_subscribe">
-                    <input type="email" name="email" placeholder="<?php _e('Your email address', 'technama'); ?>" required />
-                    <button type="submit" class="tn-btn tn-btn-primary"><?php _e('Subscribe', 'technama'); ?></button>
+                    <input type="email" name="email" placeholder="<?php esc_html_e('Your email address', 'technama'); ?>" required />
+                    <button type="submit" class="tn-btn tn-btn-primary"><?php esc_html_e('Subscribe', 'technama'); ?></button>
                 </form>
             </div>
         </div>

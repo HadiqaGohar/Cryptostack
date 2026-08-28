@@ -397,15 +397,15 @@ function technama_customizer_output_css() {
     $css = '';
 
     if ($header_bg !== '#37215F') {
-        $css .= '.site-header { background-color: ' . esc_attr($header_bg) . '; }';
+        $css .= '.site-header { background-color: ' . sanitize_hex_color($header_bg) . '; }';
     }
 
     if ($header_text !== '#ffffff') {
-        $css .= '.site-header, .site-title, .site-title a { color: ' . esc_attr($header_text) . '; }';
+        $css .= '.site-header, .site-title, .site-title a { color: ' . sanitize_hex_color($header_text) . '; }';
     }
 
     if ($footer_bg !== '#37215F') {
-        $css .= '.site-footer { background-color: ' . esc_attr($footer_bg) . '; }';
+        $css .= '.site-footer { background-color: ' . sanitize_hex_color($footer_bg) . '; }';
     }
 
     if (!empty($css)) {

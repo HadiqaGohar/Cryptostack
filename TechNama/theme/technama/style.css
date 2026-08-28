@@ -61,6 +61,11 @@ Tags: one-column, two-columns, right-sidebar, custom-logo, custom-menu, featured
     --z-dropdown: 100; --z-sticky: 200; --z-fixed: 300; --z-overlay: 400; --z-modal: 500; --z-ticker: 600;
     --container-max: 1280px; --content-width: 800px; --sidebar-width: 340px;
     --header-height: 60px; --ticker-height: 40px;
+    --tn-color-dark: #212529;
+    --tn-color-blue: #0881BE;
+    --tn-text-secondary: #6c757d;
+    --tn-font-heading: var(--font-heading);
+    --tn-font-body: var(--font-body);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

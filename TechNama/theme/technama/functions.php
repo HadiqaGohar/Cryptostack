@@ -387,18 +387,6 @@ function technama_meta_tags() {
 }
 add_action('wp_head', 'technama_meta_tags', 1);
 
-/**
- * Add reading time to posts
- */
-function technama_reading_time() {
-    if (is_single()) {
-        global $post;
-        $word_count = str_word_count(strip_tags($post->post_content));
-        $minutes = max(1, ceil($word_count / 200));
-        return $minutes;
-    }
-    return 0;
-}
 
 /**
  * Custom widget: Reading Time
@@ -488,9 +476,9 @@ function technama_track_post_view() {
 
     if (isset($_POST['post_id'])) {
         $post_id = absint($_POST['post_id']);
-        $count = (int) get_post_meta($post_id, 'post_views_count', true);
+        $count = (int) get_post_meta($post_id, 'tn_post_views', true);
         $count++;
-        update_post_meta($post_id, 'post_views_count', $count);
+        update_post_meta($post_id, 'tn_post_views', $count);
         wp_send_json_success(array('views' => $count));
     }
 
@@ -500,19 +488,19 @@ add_action('wp_ajax_technama_track_view', 'technama_track_post_view');
 add_action('wp_ajax_nopriv_technama_track_view', 'technama_track_post_view');
 
 /**
- * Track post views
+ * DISABLED: Double-counts with AJAX handler technama_track_post_view()
  */
-function technama_track_post_views() {
-    if (!is_single()) return;
-    if (is_user_logged_in()) return;
-
-    global $post;
-    $post_id = $post->ID;
-    $count = get_post_meta($post_id, 'tn_post_views', true);
-    if (!$count) $count = 0;
-    update_post_meta($post_id, 'tn_post_views', $count + 1);
-}
-add_action('wp_head', 'technama_track_post_views');
+// function technama_track_post_views() {
+//     if (!is_single()) return;
+//     if (is_user_logged_in()) return;
+// 
+//     global $post;
+//     $post_id = $post->ID;
+//     $count = get_post_meta($post_id, 'tn_post_views', true);
+//     if (!$count) $count = 0;
+//     update_post_meta($post_id, 'tn_post_views', $count + 1);
+// }
+// add_action('wp_head', 'technama_track_post_views');
 
 /**
  * Get post views
@@ -1127,7 +1115,7 @@ function technama_register_guest_role() {
         ));
     }
 }
-add_action('after_setup_theme', 'technama_register_guest_role');
+add_action('after_switch_theme', 'technama_register_guest_role');
 
 /**
  * Add guest profile fields to user profile
@@ -1430,7 +1418,13 @@ function technama_track_share() {
     
     if (!isset($shares[$platform])) $shares[$platform] = 0;
     $shares[$platform]++;
-    $shares['total'] = array_sum($shares) - (isset($shares['total']) ? $shares['total'] : 0);
+    $total = 0;
+    foreach ($shares as $key => $value) {
+        if ($key !== 'total') {
+            $total += intval($value);
+        }
+    }
+    $shares['total'] = $total;
     
     update_post_meta($post_id, '_tn_show_shares', $shares);
     
@@ -1514,4 +1508,4 @@ function technama_create_tables() {
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
 }
-add_action('after_setup_theme', 'technama_create_tables');
+add_action('after_switch_theme', 'technama_create_tables');

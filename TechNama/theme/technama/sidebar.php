@@ -1,3 +1,11 @@
+<?php
+/**
+ * Sidebar template for Technama theme.
+ */
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+?>
 <?php if (!is_page_template('page-templates/template-homepage.php') && is_active_sidebar('sidebar-main')) : ?>
 <div class="tn-sidebar">
     <?php dynamic_sidebar('sidebar-main'); ?>

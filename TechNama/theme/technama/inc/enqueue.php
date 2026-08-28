@@ -293,15 +293,14 @@ function technama_google_analytics() {
     if (empty($ga_id)) {
         return;
     }
-    $ga_id = esc_attr($ga_id);
     ?>
 <!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo $ga_id; ?>"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo esc_js( $ga_id ); ?>"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', '<?php echo $ga_id; ?>');
+gtag('config', '<?php echo esc_js( $ga_id ); ?>');
 </script>
 <!-- End Google Analytics -->
     <?php

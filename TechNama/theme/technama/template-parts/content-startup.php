@@ -25,7 +25,7 @@
     </div>
 
     <div class="tn-card-body">
-        <p class="tn-card-excerpt"><?php echo wp_trim_words(get_the_excerpt(), 20); ?></p>
+        <p class="tn-card-excerpt"><?php echo esc_html( wp_trim_words( get_the_excerpt(), 20 ) ); ?></p>
 
         <?php
         $website = get_post_meta(get_the_ID(), '_tn_startup_website', true);
@@ -51,7 +51,7 @@
         </div>
 
         <div class="tn-card-meta">
-            <span class="tn-card-date"><?php echo human_time_diff(get_the_time('U'), current_time('timestamp')) . ' ago'; ?></span>
+            <span class="tn-card-date"><?php echo esc_html( human_time_diff( get_the_time('U'), current_time('timestamp') ) ); ?> <?php esc_html_e('ago', 'technama'); ?></span>
             <?php if ($company) : ?>
                 <span class="tn-card-read"><?php echo esc_html($company); ?></span>
             <?php endif; ?>

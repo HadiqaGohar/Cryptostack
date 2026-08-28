@@ -216,3 +216,73 @@ function technama_remove_pii_from_rest($response, $post, $request) {
     return $response;
 }
 add_filter('rest_prepare_press_release', 'technama_remove_pii_from_rest', 10, 3);
+
+// ============================================================
+// Startup CPT (Phase 19A - Quick Wins)
+// ============================================================
+function technama_register_startup_cpt() {
+    $labels = array(
+        'name'               => 'Startups',
+        'singular_name'      => 'Startup',
+        'menu_name'          => 'Startups',
+        'add_new'            => 'Add Startup',
+        'add_new_item'       => 'Add New Startup',
+        'edit_item'          => 'Edit Startup',
+        'new_item'           => 'New Startup',
+        'view_item'          => 'View Startup',
+        'search_items'       => 'Search Startups',
+        'not_found'          => 'No startups found',
+        'not_found_in_trash' => 'No startups found in Trash',
+        'all_items'          => 'All Startups',
+    );
+
+    $args = array(
+        'labels'             => $labels,
+        'public'             => true,
+        'publicly_queryable' => true,
+        'show_ui'            => true,
+        'show_in_menu'       => true,
+        'show_in_rest'       => true,
+        'query_var'          => true,
+        'rewrite'            => array( 'slug' => 'startup' ),
+        'capability_type'    => 'post',
+        'has_archive'        => true,
+        'hierarchical'       => false,
+        'menu_position'      => 5,
+        'menu_icon'          => 'dashicons-rocket',
+        'supports'           => array( 'title', 'editor', 'thumbnail', 'excerpt', 'comments', 'custom-fields' ),
+    );
+
+    register_post_type( 'startup', $args );
+}
+add_action( 'init', 'technama_register_startup_cpt' );
+
+// Startup Sector Taxonomy
+function technama_register_startup_sector_taxonomy() {
+    $labels = array(
+        'name'              => 'Startup Sectors',
+        'singular_name'     => 'Startup Sector',
+        'search_items'      => 'Search Sectors',
+        'all_items'         => 'All Sectors',
+        'parent_item'       => 'Parent Sector',
+        'parent_item_colon' => 'Parent Sector:',
+        'edit_item'         => 'Edit Sector',
+        'update_item'       => 'Update Sector',
+        'add_new_item'      => 'Add New Sector',
+        'new_item_name'     => 'New Sector Name',
+        'menu_name'         => 'Sectors',
+    );
+
+    $args = array(
+        'hierarchical'      => true,
+        'labels'            => $labels,
+        'show_ui'           => true,
+        'show_admin_column' => true,
+        'show_in_rest'      => true,
+        'query_var'         => true,
+        'rewrite'           => array( 'slug' => 'startup-sector' ),
+    );
+
+    register_taxonomy( 'startup_sector', array( 'startup' ), $args );
+}
+add_action( 'init', 'technama_register_startup_sector_taxonomy' );

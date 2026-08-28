@@ -171,14 +171,14 @@ function technama_pagination() {
  * Display related posts
  */
 function technama_related_posts($count = 3) {
-    $posts = technama_get_related_posts($count);
-    if (empty($posts)) return;
+    $post_id = get_the_ID();
+    $posts = technama_get_related_posts($post_id, $count);
+    if (!$posts->have_posts()) return;
 
     echo '<div class="content-grid content-grid-' . esc_attr($count) . '">';
-    foreach ($posts as $post) {
-        setup_postdata($post);
+    while ($posts->have_posts()) : $posts->the_post();
         get_template_part('template-parts/content', 'card');
-    }
+    endwhile;
     wp_reset_postdata();
     echo '</div>';
 }
@@ -218,12 +218,11 @@ function technama_newsletter_form() {
  */
 function technama_popular_posts($count = 5) {
     $posts = technama_get_trending_posts($count);
-    if (empty($posts)) return;
+    if (!$posts->have_posts()) return;
 
     echo '<div class="widget_recent_entries">';
-    foreach ($posts as $post) {
-        setup_postdata($post);
-        $views = (int) get_post_meta($post->ID, 'post_views_count', true);
+    while ($posts->have_posts()) : $posts->the_post();
+        $views = (int) get_post_meta(get_the_ID(), 'tn_post_views', true);
         echo '<div class="post-item">';
         echo '<div class="post-thumb">';
         echo '<a href="' . esc_url(get_permalink()) . '">';
@@ -237,7 +236,7 @@ function technama_popular_posts($count = 5) {
         echo '<span class="post-date">' . esc_html(get_the_date()) . '</span>';
         echo '</div>';
         echo '</div>';
-    }
+    endwhile;
     wp_reset_postdata();
     echo '</div>';
 }
@@ -246,7 +245,7 @@ function technama_popular_posts($count = 5) {
  * Post view count display
  */
 function technama_post_views() {
-    $views = (int) get_post_meta(get_the_ID(), 'post_views_count', true);
+    $views = (int) get_post_meta(get_the_ID(), 'tn_post_views', true);
     printf('<span class="post-views">%s %s</span>', number_format_i18n($views), _n('view', 'views', $views, 'technama'));
 }
 

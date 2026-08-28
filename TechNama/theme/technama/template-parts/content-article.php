@@ -13,10 +13,10 @@
         <h3 class="tn-card-title">
             <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
         </h3>
-        <p class="tn-card-excerpt"><?php echo wp_trim_words(get_the_excerpt(), 15); ?></p>
+        <p class="tn-card-excerpt"><?php echo esc_html( wp_trim_words( get_the_excerpt(), 15 ) ); ?></p>
         <div class="tn-card-meta">
-            <span class="tn-card-author"><?php echo get_avatar(get_the_author_meta('ID'), 24); ?> <?php the_author(); ?></span>
-            <span class="tn-card-date"><?php echo human_time_diff(get_the_time('U'), current_time('timestamp')) . ' ago'; ?></span>
+            <span class="tn-card-author"><?php echo get_avatar(get_the_author_meta('ID'), 24); ?> <?php echo esc_html( get_the_author() ); ?></span>
+            <span class="tn-card-date"><?php echo esc_html( human_time_diff( get_the_time('U'), current_time('timestamp') ) ); ?> <?php esc_html_e('ago', 'technama'); ?></span>
         </div>
     </div>
 </article>

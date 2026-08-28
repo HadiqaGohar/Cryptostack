@@ -28,8 +28,8 @@
         </h3>
         
         <div class="tn-card-meta">
-            <span class="tn-card-date"><?php echo get_the_date(); ?></span>
-            <span class="tn-card-views"><?php echo technama_get_post_views(); ?> views</span>
+            <span class="tn-card-date"><?php echo esc_html( get_the_date() ); ?></span>
+            <span class="tn-card-views"><?php echo esc_html( technama_get_post_views() ); ?> <?php esc_html_e('views', 'technama'); ?></span>
         </div>
     </div>
 </article>

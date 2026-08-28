@@ -2,6 +2,9 @@
 /**
  * TechNama Footer Template
  */
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 ?>
 </main>
 
@@ -60,7 +63,7 @@ $social_youtube = get_theme_mod('technama_social_youtube', '');
                 <div class="tn-footer-col">
                     <h4 class="tn-footer-title"><?php esc_html_e('Newsletter', 'technama'); ?></h4>
                     <p class="tn-footer-newsletter-text"><?php esc_html_e('Get the latest tech news delivered to your inbox.', 'technama'); ?></p>
-                    <form class="tn-newsletter-form" id="tn-newsletter-form">
+                    <form class="tn-newsletter-form" id="tn-newsletter-form" data-ajax="tn_subscribe">
                         <input type="email" name="email" placeholder="<?php esc_attr_e('Your email address', 'technama'); ?>" required />
                         <button type="submit" class="tn-btn tn-btn-primary"><?php esc_html_e('Subscribe', 'technama'); ?></button>
                     </form>
@@ -90,6 +93,49 @@ $social_youtube = get_theme_mod('technama_social_youtube', '');
 <button class="tn-back-to-top" id="tn-back-to-top" aria-label="<?php esc_attr_e('Back to top', 'technama'); ?>">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
 </button>
+
+<script>
+document.getElementById('tn-back-to-top')?.addEventListener('click', function() {
+    window.scrollTo({top: 0, behavior: 'smooth'});
+});
+document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('tn-back-to-top');
+    if (!btn) return;
+    window.addEventListener('scroll', function() {
+        btn.classList.toggle('visible', window.scrollY > 400);
+    });
+});
+document.querySelectorAll('.tn-newsletter-form[data-ajax]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var email = form.querySelector('input[name="email"]').value;
+        var btn = form.querySelector('button[type="submit"]');
+        var origText = btn.textContent;
+        btn.textContent = '...';
+        btn.disabled = true;
+        var data = new FormData();
+        data.append('action', 'tn_subscribe');
+        data.append('email', email);
+        data.append('nonce', typeof tn_share_vars !== 'undefined' ? tn_share_vars.nonce : '');
+        fetch(typeof tn_share_vars !== 'undefined' ? tn_share_vars.ajax_url : '/wp-admin/admin-ajax.php', {
+            method: 'POST',
+            body: data,
+        }).then(function(r) { return r.json(); }).then(function(res) {
+            btn.textContent = origText;
+            btn.disabled = false;
+            if (res.success) {
+                form.innerHTML = '<p style="color:#22c55e;font-weight:600;">' + res.data.message + '</p>';
+            } else {
+                alert(res.data && res.data.message ? res.data.message : 'Subscription failed.');
+            }
+        }).catch(function() {
+            btn.textContent = origText;
+            btn.disabled = false;
+            alert('Network error. Please try again.');
+        });
+    });
+});
+</script>
 
 <!-- TechNama AdSense Auto-Ads -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
