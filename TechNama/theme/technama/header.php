@@ -139,7 +139,7 @@ $social_youtube = get_theme_mod('technama_social_youtube', '');
                         'posts_per_page' => 10,
                         'orderby'        => 'date',
                         'order'          => 'DESC',
-                        'category'       => 0, // Add your breaking news category ID
+                        'category'       => absint(get_theme_mod('technama_ticker_category', 0)),
                     ));
                     if ($breaking_news->have_posts()) :
                         while ($breaking_news->have_posts()) : $breaking_news->the_post();
