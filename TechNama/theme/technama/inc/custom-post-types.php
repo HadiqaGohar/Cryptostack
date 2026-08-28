@@ -182,3 +182,37 @@ function technama_rewrite_flush() {
     flush_rewrite_rules();
 }
 add_action('after_switch_theme', 'technama_rewrite_flush');
+
+/**
+ * REST API permission callback - restrict PII exposure
+ * Only logged-in users can access press_release via REST API
+ */
+function technama_restrict_rest_api($response, $handler, $request) {
+    $route = $request->get_route();
+    
+    // Restrict press_release REST API access to editors+
+    if (strpos($route, '/press_release') !== false || strpos($route, '/press-release') !== false) {
+        if (!current_user_can('edit_others_posts')) {
+            return new WP_Error(
+                'rest_forbidden',
+                __('You do not have permission to access this resource.', 'technama'),
+                array('status' => 403)
+            );
+        }
+    }
+    
+    return $response;
+}
+add_filter('rest_request_before_callbacks', 'technama_restrict_rest_api', 10, 3);
+
+/**
+ * Remove PII from REST API responses for press_release
+ */
+function technama_remove_pii_from_rest($response, $post, $request) {
+    if ($post->post_type === 'press_release' && isset($response->data['meta'])) {
+        unset($response->data['meta']['pr_contact_email']);
+        unset($response->data['meta']['pr_contact_phone']);
+    }
+    return $response;
+}
+add_filter('rest_prepare_press_release', 'technama_remove_pii_from_rest', 10, 3);

@@ -81,6 +81,21 @@ function technama_enqueue_scripts() {
         );
     }
 
+    // Show filters script
+    if (is_page_template('page-templates/template-live-shows.php') || is_singular('video_review')) {
+        wp_enqueue_script(
+            'technama-show-filters',
+            get_stylesheet_directory_uri() . '/assets/js/show-filters.js',
+            array(),
+            '1.0.0',
+            true
+        );
+        wp_localize_script('technama-show-filters', 'tn_share_vars', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('technama_nonce'),
+        ));
+    }
+
     // Localize script for AJAX
     wp_localize_script('technama-main', 'technamaAjax', array(
         'ajaxurl' => admin_url('admin-ajax.php'),

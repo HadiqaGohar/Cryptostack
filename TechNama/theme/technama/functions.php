@@ -755,14 +755,14 @@ function technama_newsletter_subscribe() {
     
     if ($existing) {
         $wpdb->update($table, array('status' => 'active'), array('email' => $email));
-        wp_send_json_success(array('message' => 'Welcome back! You are now subscribed.'));
+        wp_send_json_success(array('message' => 'Thank you! If this email is not already registered, you will receive a confirmation shortly.'));
     } else {
         $wpdb->insert($table, array(
             'email' => $email,
             'status' => 'active',
             'consent_date' => current_time('mysql'),
         ));
-        wp_send_json_success(array('message' => 'Thank you for subscribing!'));
+        wp_send_json_success(array('message' => 'Thank you! If this email is not already registered, you will receive a confirmation shortly.'));
     }
 }
 add_action('wp_ajax_tn_subscribe', 'technama_newsletter_subscribe');
@@ -990,10 +990,11 @@ function technama_log_failed_login($user_login) {
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
     error_log(sprintf('[TechNama Security] Failed login: %s | IP: %s | UA: %s | Time: %s', $user_login, $ip, $user_agent, current_time('mysql')));
-    $failed_logins = get_option('technama_failed_logins', array());
+    $failed_logins = get_transient('technama_failed_logins');
+    if (!$failed_logins) $failed_logins = array();
     $failed_logins[] = array('username' => $user_login, 'ip' => $ip, 'user_agent' => $user_agent, 'time' => current_time('mysql'));
     if (count($failed_logins) > 100) { $failed_logins = array_slice($failed_logins, -100); }
-    update_option('technama_failed_logins', $failed_logins);
+    set_transient('technama_failed_logins', $failed_logins, 24 * HOUR_IN_SECONDS);
 }
 add_action('wp_login_failed', 'technama_log_failed_login');
 
@@ -1040,7 +1041,7 @@ add_action('admin_menu', 'technama_security_audit_page');
 
 function technama_security_audit_render() {
     if (!current_user_can('manage_options')) return;
-    $failed_logins = get_option('technama_failed_logins', array());
+    $failed_logins = get_transient('technama_failed_logins'); if (!$failed_logins) $failed_logins = array();
     $recent = array_slice(array_reverse($failed_logins), -20);
     echo '<div class="wrap"><h1>Security Audit Dashboard</h1>';
     echo '<div class="card"><h2>Security Status</h2>';
@@ -1068,3 +1069,392 @@ function technama_security_audit_render() {
     }
     echo '</div></div>';
 }
+
+/**
+ * ============================================================
+ * PHASE 11: STARTUP LIVE SHOW - OPERATING MODEL
+ * ============================================================
+ */
+
+/**
+ * Register Guest user role on theme activation
+ */
+function technama_register_guest_role() {
+    if (!get_role('guest')) {
+        add_role('guest', __('Guest', 'technama'), array(
+            'read' => true,
+            'edit_posts' => false,
+            'delete_posts' => false,
+            'publish_posts' => false,
+            'upload_files' => false,
+            'edit_others_posts' => false,
+            'manage_options' => false,
+        ));
+    }
+}
+add_action('after_setup_theme', 'technama_register_guest_role');
+
+/**
+ * Add guest profile fields to user profile
+ */
+function technama_guest_profile_fields($user) {
+    if (!current_user_can('manage_options')) return;
+    ?>
+    <h3><?php _e('Guest Profile (for Live Shows)', 'technama'); ?></h3>
+    <table class="form-table">
+        <tr>
+            <th><label for="guest_title"><?php _e('Job Title', 'technama'); ?></label></th>
+            <td><input type="text" name="guest_title" id="guest_title" value="<?php echo esc_attr(get_the_author_meta('guest_title', $user->ID)); ?>" class="regular-text" /></td>
+        </tr>
+        <tr>
+            <th><label for="guest_company"><?php _e('Company', 'technama'); ?></label></th>
+            <td><input type="text" name="guest_company" id="guest_company" value="<?php echo esc_attr(get_the_author_meta('guest_company', $user->ID)); ?>" class="regular-text" /></td>
+        </tr>
+        <tr>
+            <th><label for="guest_bio"><?php _e('Short Bio', 'technama'); ?></label></th>
+            <td><textarea name="guest_bio" id="guest_bio" rows="4" class="large-text"><?php echo esc_textarea(get_the_author_meta('guest_bio', $user->ID)); ?></textarea></td>
+        </tr>
+        <tr>
+            <th><label for="guest_social_twitter"><?php _e('Twitter/X URL', 'technama'); ?></label></th>
+            <td><input type="url" name="guest_social_twitter" id="guest_social_twitter" value="<?php echo esc_url(get_the_author_meta('guest_social_twitter', $user->ID)); ?>" class="regular-text" /></td>
+        </tr>
+        <tr>
+            <th><label for="guest_social_linkedin"><?php _e('LinkedIn URL', 'technama'); ?></label></th>
+            <td><input type="url" name="guest_social_linkedin" id="guest_social_linkedin" value="<?php echo esc_url(get_the_author_meta('guest_social_linkedin', $user->ID)); ?>" class="regular-text" /></td>
+        </tr>
+        <tr>
+            <th><label for="guest_social_website"><?php _e('Website URL', 'technama'); ?></label></th>
+            <td><input type="url" name="guest_social_website" id="guest_social_website" value="<?php echo esc_url(get_the_author_meta('guest_social_website', $user->ID)); ?>" class="regular-text" /></td>
+        </tr>
+    </table>
+    <?php
+}
+add_action('show_user_profile', 'technama_guest_profile_fields');
+add_action('edit_user_profile', 'technama_guest_profile_fields');
+
+/**
+ * Save guest profile fields
+ */
+function technama_save_guest_profile_fields($user_id) {
+    if (!current_user_can('edit_user', $user_id)) return;
+    
+    $fields = array('guest_title', 'guest_company', 'guest_bio', 'guest_social_twitter', 'guest_social_linkedin', 'guest_social_website');
+    foreach ($fields as $field) {
+        if (isset($_POST[$field])) {
+            if (strpos($field, 'social') !== false || $field === 'guest_social_website') {
+                update_user_meta($user_id, $field, esc_url_raw($_POST[$field]));
+            } else {
+                update_user_meta($user_id, $field, sanitize_text_field($_POST[$field]));
+            }
+        }
+    }
+}
+add_action('personal_options_update', 'technama_save_guest_profile_fields');
+add_action('edit_user_profile_update', 'technama_save_guest_profile_fields');
+
+/**
+ * Get guest profile data
+ */
+function technama_get_guest_profile($user_id) {
+    return array(
+        'title'    => get_the_author_meta('guest_title', $user_id),
+        'company'  => get_the_author_meta('guest_company', $user_id),
+        'bio'      => get_the_author_meta('guest_bio', $user_id),
+        'twitter'  => get_the_author_meta('guest_social_twitter', $user_id),
+        'linkedin' => get_the_author_meta('guest_social_linkedin', $user_id),
+        'website'  => get_the_author_meta('guest_social_website', $user_id),
+        'name'     => get_the_author_meta('display_name', $user_id),
+        'avatar'   => get_avatar_url($user_id, array('size' => 120)),
+    );
+}
+
+/**
+ * Admin dropdown to select guest for episodes
+ */
+function technama_guest_dropdown($selected = 0) {
+    $guests = get_users(array('role' => 'guest'));
+    $editors = get_users(array('role__in' => array('editor', 'administrator')));
+    $all_users = array_merge($guests, $editors);
+    
+    echo '<select name="tn_show_guest_id" id="tn_show_guest_id" class="postform">';
+    echo '<option value="0">' . __('— Select Guest —', 'technama') . '</option>';
+    foreach ($all_users as $user) {
+        $profile = technama_get_guest_profile($user->ID);
+        $label = $profile['name'];
+        if (!empty($profile['title']) && !empty($profile['company'])) {
+            $label .= ' — ' . $profile['title'] . ' @ ' . $profile['company'];
+        }
+        printf('<option value="%d" %s>%s</option>', $user->ID, selected($selected, $user->ID, false), esc_html($label));
+    }
+    echo '</select>';
+}
+
+/**
+ * Add show meta boxes in admin
+ */
+function technama_show_meta_boxes() {
+    add_meta_box('tn_show_details', __('Show Details', 'technama'), 'technama_show_details_callback', 'video_review', 'side', 'high');
+}
+add_action('add_meta_boxes', 'technama_show_meta_boxes');
+
+function technama_show_details_callback($post) {
+    wp_nonce_field('tn_show_details_nonce', 'tn_show_nonce');
+    
+    $guest_id = get_post_meta($post->ID, '_tn_show_guest_id', true);
+    $show_date = get_post_meta($post->ID, '_tn_show_date', true);
+    $show_time = get_post_meta($post->ID, '_tn_show_time', true);
+    $show_status = get_post_meta($post->ID, '_tn_show_status', true);
+    $episode_number = get_post_meta($post->ID, '_tn_show_episode_number', true);
+    $season = get_post_meta($post->ID, '_tn_show_season', true);
+    $show_topic = get_post_meta($post->ID, '_tn_show_topic', true);
+    ?>
+    <p>
+        <label><strong><?php _e('Guest', 'technama'); ?></strong></label><br/>
+        <?php technama_guest_dropdown($guest_id); ?>
+    </p>
+    <p>
+        <label><strong><?php _e('Show Date', 'technama'); ?></strong></label><br/>
+        <input type="date" name="tn_show_date" value="<?php echo esc_attr($show_date); ?>" class="widefat" />
+    </p>
+    <p>
+        <label><strong><?php _e('Show Time', 'technama'); ?></strong></label><br/>
+        <input type="time" name="tn_show_time" value="<?php echo esc_attr($show_time); ?>" class="widefat" />
+    </p>
+    <p>
+        <label><strong><?php _e('Status', 'technama'); ?></strong></label><br/>
+        <select name="tn_show_status" class="widefat">
+            <option value="scheduled" <?php selected($show_status, 'scheduled'); ?>><?php _e('Scheduled', 'technama'); ?></option>
+            <option value="live" <?php selected($show_status, 'live'); ?>><?php _e('Live', 'technama'); ?></option>
+            <option value="archived" <?php selected($show_status, 'archived'); ?>><?php _e('Archived', 'technama'); ?></option>
+        </select>
+    </p>
+    <p>
+        <label><strong><?php _e('Season', 'technama'); ?></strong></label><br/>
+        <input type="number" name="tn_show_season" value="<?php echo esc_attr($season); ?>" min="1" class="widefat" />
+    </p>
+    <p>
+        <label><strong><?php _e('Episode Number', 'technama'); ?></strong></label><br/>
+        <input type="number" name="tn_show_episode_number" value="<?php echo esc_attr($episode_number); ?>" min="1" class="widefat" />
+    </p>
+    <p>
+        <label><strong><?php _e('Show Topic', 'technama'); ?></strong></label><br/>
+        <input type="text" name="tn_show_topic" value="<?php echo esc_attr($show_topic); ?>" class="widefat" placeholder="<?php _e('e.g. Building Fintech in Pakistan', 'technama'); ?>" />
+    </p>
+    <?php
+}
+
+/**
+ * Save show meta box data
+ */
+function technama_save_show_meta($post_id) {
+    if (!isset($_POST['tn_show_nonce']) || !wp_verify_nonce($_POST['tn_show_nonce'], 'tn_show_details_nonce')) return;
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+    if (!current_user_can('edit_post', $post_id)) return;
+    
+    $fields = array(
+        'tn_show_guest_id'       => 'intval',
+        'tn_show_date'           => 'sanitize_text_field',
+        'tn_show_time'           => 'sanitize_text_field',
+        'tn_show_status'         => 'sanitize_text_field',
+        'tn_show_episode_number' => 'intval',
+        'tn_show_season'         => 'intval',
+        'tn_show_topic'          => 'sanitize_text_field',
+    );
+    
+    foreach ($fields as $key => $sanitizer) {
+        if (isset($_POST[$key])) {
+            update_post_meta($post_id, '_' . $key, $sanitizer($_POST[$key]));
+        }
+    }
+}
+add_action('save_post_video_review', 'technama_save_show_meta');
+
+/**
+ * Auto-increment episode number
+ */
+function technama_auto_episode_number($post_id) {
+    if (get_post_meta($post_id, '_tn_show_episode_number', true)) return;
+    
+    $args = array(
+        'post_type'      => 'video_review',
+        'posts_per_page' => 1,
+        'post_status'    => 'any',
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+        'post__not_in'   => array($post_id),
+    );
+    $recent = new WP_Query($args);
+    if ($recent->have_posts()) {
+        $recent->the_post();
+        $last_ep = (int) get_post_meta(get_the_ID(), '_tn_show_episode_number', true);
+        update_post_meta($post_id, '_tn_show_episode_number', $last_ep + 1);
+    } else {
+        update_post_meta($post_id, '_tn_show_episode_number', 1);
+    }
+    wp_reset_postdata();
+}
+add_action('save_post_video_review', 'technama_auto_episode_number', 20);
+
+/**
+ * Get upcoming shows (scheduled status, future date)
+ */
+function technama_get_upcoming_shows($count = 5) {
+    return new WP_Query(array(
+        'post_type'      => 'video_review',
+        'posts_per_page' => $count,
+        'post_status'    => 'publish',
+        'meta_query'     => array(
+            array(
+                'key'     => '_tn_show_status',
+                'value'   => 'scheduled',
+                'compare' => '=',
+            ),
+            array(
+                'key'     => '_tn_show_date',
+                'value'   => date('Y-m-d'),
+                'compare' => '>=',
+                'type'    => 'DATE',
+            ),
+        ),
+        'orderby'  => 'meta_value',
+        'meta_key' => '_tn_show_date',
+        'order'    => 'ASC',
+    ));
+}
+
+/**
+ * Get archived shows
+ */
+function technama_get_archived_shows($count = -1) {
+    return new WP_Query(array(
+        'post_type'      => 'video_review',
+        'posts_per_page' => $count,
+        'post_status'    => 'publish',
+        'meta_query'     => array(
+            array(
+                'key'     => '_tn_show_status',
+                'value'   => 'archived',
+                'compare' => '=',
+            ),
+        ),
+        'orderby'  => 'meta_value',
+        'meta_key' => '_tn_show_date',
+        'order'    => 'DESC',
+    ));
+}
+
+/**
+ * Get live shows
+ */
+function technama_get_live_shows($count = 1) {
+    return new WP_Query(array(
+        'post_type'      => 'video_review',
+        'posts_per_page' => $count,
+        'post_status'    => 'publish',
+        'meta_query'     => array(
+            array(
+                'key'     => '_tn_show_status',
+                'value'   => 'live',
+                'compare' => '=',
+            ),
+        ),
+    ));
+}
+
+/**
+ * Social Share Buttons
+ */
+function technama_share_buttons($post_id = null) {
+    if (!$post_id) $post_id = get_the_ID();
+    $url = urlencode(get_permalink($post_id));
+    $title = urlencode(get_the_title($post_id));
+    
+    echo '<div class="tn-share-buttons">';
+    printf('<a href="https://twitter.com/intent/tweet?url=%s&text=%s" target="_blank" rel="noopener noreferrer" class="tn-share-btn tn-share-twitter" data-post-id="%d"><span class="tn-share-icon">𝕏</span> %s</a>', $url, $title, $post_id, __('Twitter', 'technama'));
+    printf('<a href="https://www.linkedin.com/shareArticle?mini=true&url=%s&title=%s" target="_blank" rel="noopener noreferrer" class="tn-share-btn tn-share-linkedin" data-post-id="%d"><span class="tn-share-icon">in</span> %s</a>', $url, $title, $post_id, __('LinkedIn', 'technama'));
+    printf('<a href="https://www.facebook.com/sharer/sharer.php?u=%s" target="_blank" rel="noopener noreferrer" class="tn-share-btn tn-share-facebook" data-post-id="%d"><span class="tn-share-icon">f</span> %s</a>', $url, $post_id, __('Facebook', 'technama'));
+    printf('<button class="tn-share-btn tn-share-copy" data-url="%s" data-post-id="%d"><span class="tn-share-icon">🔗</span> %s</button>', $url, $post_id, __('Copy Link', 'technama'));
+    echo '</div>';
+}
+
+/**
+ * Track social share (AJAX)
+ */
+function technama_track_share() {
+    check_ajax_referer('technama_nonce', 'nonce');
+    
+    $post_id = absint($_POST['post_id']);
+    $platform = sanitize_text_field($_POST['platform']);
+    
+    if (!$post_id || !in_array($platform, array('twitter', 'linkedin', 'facebook', 'copy'))) {
+        wp_send_json_error();
+    }
+    
+    $shares = get_post_meta($post_id, '_tn_show_shares', true);
+    if (!is_array($shares)) $shares = array();
+    
+    if (!isset($shares[$platform])) $shares[$platform] = 0;
+    $shares[$platform]++;
+    $shares['total'] = array_sum($shares) - (isset($shares['total']) ? $shares['total'] : 0);
+    
+    update_post_meta($post_id, '_tn_show_shares', $shares);
+    
+    wp_send_json_success(array('shares' => $shares));
+}
+add_action('wp_ajax_tn_track_share', 'technama_track_share');
+add_action('wp_ajax_nopriv_tn_track_share', 'technama_track_share');
+
+/**
+ * Get share count for a post
+ */
+function technama_get_share_count($post_id = null) {
+    if (!$post_id) $post_id = get_the_ID();
+    $shares = get_post_meta($post_id, '_tn_show_shares', true);
+    if (!is_array($shares)) return 0;
+    $total = 0;
+    foreach ($shares as $key => $val) {
+        if ($key !== 'total' && is_numeric($val)) $total += $val;
+    }
+    return $total;
+}
+
+/**
+ * Add VideoObject schema for video_review posts
+ */
+function technama_video_object_schema() {
+    if (!is_single()) return;
+    
+    global $post;
+    if ($post->post_type !== 'video_review') return;
+    
+    $youtube_id = get_post_meta($post->ID, '_tn_youtube_id', true);
+    $duration = get_post_meta($post->ID, '_tn_show_duration', true);
+    $guest_id = get_post_meta($post->ID, '_tn_show_guest_id', true);
+    
+    $schema = array(
+        '@context'      => 'https://schema.org',
+        '@type'         => 'VideoObject',
+        'name'          => get_the_title(),
+        'description'   => wp_trim_words(get_the_excerpt(), 30),
+        'uploadDate'    => get_the_date('c'),
+        'thumbnailUrl'  => has_post_thumbnail() ? get_the_post_thumbnail_url($post->ID, 'large') : '',
+        'contentUrl'    => $youtube_id ? 'https://www.youtube.com/watch?v=' . $youtube_id : '',
+        'embedUrl'      => $youtube_id ? 'https://www.youtube.com/embed/' . $youtube_id : '',
+        'interactionCount' => (string) technama_get_post_views($post->ID),
+    );
+    
+    if ($duration) {
+        $schema['duration'] = 'PT' . $duration;
+    }
+    
+    if ($guest_id) {
+        $guest = technama_get_guest_profile($guest_id);
+        $schema['contributor'] = array(
+            '@type' => 'Person',
+            'name'  => $guest['name'],
+        );
+    }
+    
+    echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . '</script>' . PHP_EOL;
+}
+add_action('wp_head', 'technama_video_object_schema', 5);

@@ -1,4 +1,4 @@
-<article class="tn-card tn-card-video" id="post-<?php the_ID(); ?>">
+<article id="post-<?php the_ID(); ?>" <?php post_class('tn-card tn-card-video'); ?> data-show-status="<?php echo esc_attr(get_post_meta(get_the_ID(), '_tn_show_status', true)); ?>">
     <div class="tn-card-thumb">
         <a href="<?php the_permalink(); ?>">
             <?php if (has_post_thumbnail()) : ?>
