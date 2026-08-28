@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e2e8f0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#cbd5e0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="250" fill="url(#grad)"/>
+  <circle cx="200" cy="105" r="30" fill="#37215F" opacity="0.8"/>
+  <polygon points="195,95 215,105 195,115" fill="white"/>
+  <text x="200" y="170" font-family="Arial, sans-serif" font-size="14" fill="#718096" text-anchor="middle">TechNama</text>
+  <text x="200" y="190" font-family="Arial, sans-serif" font-size="12" fill="#a0aec0" text-anchor="middle">Technology News</text>
+</svg>

@@ -51,6 +51,15 @@ function technama_theme_setup() {
 add_action('after_setup_theme', 'technama_theme_setup');
 
 /**
+ * Polyfill for wp_body_open() for backward compatibility
+ */
+if (!function_exists('wp_body_open')) {
+    function wp_body_open() {
+        do_action('wp_body_open');
+    }
+}
+
+/**
  * Register Widgets
  */
 function technama_widgets_init() {
@@ -220,25 +229,25 @@ function technama_sponsor_admin_page_callback() {
                 <tr>
                     <td><?php _e('Homepage Leaderboard', 'technama'); ?></td>
                     <td>728 x 90</td>
-                    <td><?php echo is_active_sidebar('sponsor-homepage-leaderboard') ? '<span style="color:green">Active</span>' : '<span style="color:red">Empty</span>'; ?></td>
+                    <td><?php echo is_active_sidebar('sponsor-homepage-leaderboard') ? '<span style="color:#22c55e; font-weight:600;">Active</span>' : '<span style="color:#ef4444; font-weight:600;">Empty</span>'; ?></td>
                     <td><a href="<?php echo admin_url('widgets.php'); ?>"><?php _e('Configure', 'technama'); ?></a></td>
                 </tr>
                 <tr>
                     <td><?php _e('Sidebar Banner', 'technama'); ?></td>
                     <td>300 x 250</td>
-                    <td><?php echo is_active_sidebar('sponsor-sidebar') ? '<span style="color:green">Active</span>' : '<span style="color:red">Empty</span>'; ?></td>
+                    <td><?php echo is_active_sidebar('sponsor-sidebar') ? '<span style="color:#22c55e; font-weight:600;">Active</span>' : '<span style="color:#ef4444; font-weight:600;">Empty</span>'; ?></td>
                     <td><a href="<?php echo admin_url('widgets.php'); ?>"><?php _e('Configure', 'technama'); ?></a></td>
                 </tr>
                 <tr>
                     <td><?php _e('Article Top Banner', 'technama'); ?></td>
                     <td>728 x 90</td>
-                    <td><?php echo is_active_sidebar('sponsor-article-top') ? '<span style="color:green">Active</span>' : '<span style="color:red">Empty</span>'; ?></td>
+                    <td><?php echo is_active_sidebar('sponsor-article-top') ? '<span style="color:#22c55e; font-weight:600;">Active</span>' : '<span style="color:#ef4444; font-weight:600;">Empty</span>'; ?></td>
                     <td><a href="<?php echo admin_url('widgets.php'); ?>"><?php _e('Configure', 'technama'); ?></a></td>
                 </tr>
                 <tr>
                     <td><?php _e('Footer Banner', 'technama'); ?></td>
                     <td>728 x 90</td>
-                    <td><?php echo is_active_sidebar('sponsor-footer') ? '<span style="color:green">Active</span>' : '<span style="color:red">Empty</span>'; ?></td>
+                    <td><?php echo is_active_sidebar('sponsor-footer') ? '<span style="color:#22c55e; font-weight:600;">Active</span>' : '<span style="color:#ef4444; font-weight:600;">Empty</span>'; ?></td>
                     <td><a href="<?php echo admin_url('widgets.php'); ?>"><?php _e('Configure', 'technama'); ?></a></td>
                 </tr>
             </tbody>
@@ -301,15 +310,40 @@ function technama_body_classes($classes) {
     if (is_singular()) {
         $classes[] = 'technama-singular';
     }
-    if (is_page_template('page-templates/template-full-width.php')) {
-        $classes[] = 'technama-full-width';
-    }
+    // Note: template-full-width.php not yet created - removed body class reference
     if (is_page_template('page-templates/template-live-shows.php')) {
         $classes[] = 'technama-live-shows';
     }
     return $classes;
 }
 add_filter('body_class', 'technama_body_classes');
+
+/**
+ * Fallback menu when no menu is assigned
+ */
+function technama_fallback_menu() {
+    echo '<ul id="menu-primary" class="menu">';
+    echo '<li class="menu-item"><a href="' . esc_url(home_url('/')) . '">' . __('Home', 'technama') . '</a></li>';
+    echo '<li class="menu-item"><a href="' . esc_url(home_url('/category/news/')) . '">' . __('News', 'technama') . '</a></li>';
+    echo '<li class="menu-item"><a href="' . esc_url(home_url('/category/startups/')) . '">' . __('Startups', 'technama') . '</a></li>';
+    echo '<li class="menu-item"><a href="' . esc_url(home_url('/live-shows/')) . '">' . __('Live Shows', 'technama') . '</a></li>';
+    echo '<li class="menu-item"><a href="' . esc_url(home_url('/deals/')) . '">' . __('Deals', 'technama') . '</a></li>';
+    echo '<li class="menu-item"><a href="' . esc_url(home_url('/about/')) . '">' . __('About', 'technama') . '</a></li>';
+    echo '<li class="menu-item"><a href="' . esc_url(home_url('/contact/')) . '">' . __('Contact', 'technama') . '</a></li>';
+    echo '</ul>';
+}
+
+/**
+ * Fallback footer menu
+ */
+function technama_footer_fallback_menu() {
+    echo '<ul class="footer-menu">';
+    echo '<li><a href="' . esc_url(home_url('/privacy-policy/')) . '">' . __('Privacy Policy', 'technama') . '</a></li>';
+    echo '<li><a href="' . esc_url(home_url('/terms-of-service/')) . '">' . __('Terms of Service', 'technama') . '</a></li>';
+    echo '<li><a href="' . esc_url(home_url('/cookie-policy/')) . '">' . __('Cookie Policy', 'technama') . '</a></li>';
+    echo '<li><a href="' . esc_url(home_url('/contact/')) . '">' . __('Contact', 'technama') . '</a></li>';
+    echo '</ul>';
+}
 
 /**
  * Custom pingback url for single posts
@@ -434,16 +468,17 @@ function technama_get_trending_posts($count = 5) {
 /**
  * Post views counter
  */
-function technama_set_post_views() {
-    if (is_single()) {
-        global $post;
-        $post_id = $post->ID;
-        $count = (int) get_post_meta($post_id, 'post_views_count', true);
-        $count++;
-        update_post_meta($post_id, 'post_views_count', $count);
-    }
-}
-add_action('wp_head', 'technama_set_post_views');
+// REMOVED: Duplicate view counting - using technama_track_post_views() instead
+// function technama_set_post_views() {
+//     if (is_single()) {
+//         global $post;
+//         $post_id = $post->ID;
+//         $count = (int) get_post_meta($post_id, 'post_views_count', true);
+//         $count++;
+//         update_post_meta($post_id, 'post_views_count', $count);
+//     }
+// }
+// add_action('wp_head', 'technama_set_post_views');
 
 /**
  * Track post views via AJAX for performance
@@ -1458,3 +1493,25 @@ function technama_video_object_schema() {
     echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . '</script>' . PHP_EOL;
 }
 add_action('wp_head', 'technama_video_object_schema', 5);
+
+/**
+ * Create newsletter subscribers table on theme activation
+ */
+function technama_create_tables() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'newsletter_subscribers';
+    $charset_collate = $wpdb->get_charset_collate();
+    
+    $sql = "CREATE TABLE $table_name (
+        id mediumint(9) NOT NULL AUTO_INCREMENT,
+        email varchar(100) NOT NULL,
+        status varchar(20) NOT NULL DEFAULT 'active',
+        consent_date datetime NOT NULL,
+        PRIMARY KEY (id),
+        UNIQUE KEY email (email)
+    ) $charset_collate;";
+    
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
+}
+add_action('after_setup_theme', 'technama_create_tables');
