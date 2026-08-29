@@ -44,7 +44,7 @@ get_header();
                         <?php if (has_post_thumbnail()) : ?>
                             <?php the_post_thumbnail('technama-hero', array('class' => 'hero-image')); ?>
                         <?php else : ?>
-                            <img src="<?php echo esc_url(get_template_directory_uri()); ?>/assets/images/placeholder-hero.jpg" alt="<?php the_title_attribute(); ?>" class="hero-image">
+                            <img src="<?php echo esc_url(get_template_directory_uri()); ?>/assets/images/placeholder-hero.svg" alt="<?php the_title_attribute(); ?>" class="hero-image">
                         <?php endif; ?>
                         <div class="hero-overlay">
                             <?php if ($cat_name) : ?>
@@ -91,7 +91,7 @@ get_header();
                                 <?php if (has_post_thumbnail()) : ?>
                                     <?php the_post_thumbnail('technama-card', array('class' => 'hero-image')); ?>
                                 <?php else : ?>
-                                    <img src="<?php echo esc_url(get_template_directory_uri()); ?>/assets/images/placeholder-card.jpg" alt="<?php the_title_attribute(); ?>" class="hero-image">
+                                    <img src="<?php echo esc_url(get_template_directory_uri()); ?>/assets/images/placeholder-card.svg" alt="<?php the_title_attribute(); ?>" class="hero-image">
                                 <?php endif; ?>
                                 <div class="hero-overlay">
                                     <?php if ($side_cat_name) : ?>
@@ -186,7 +186,7 @@ get_header();
                                             <?php if (has_post_thumbnail()) : ?>
                                                 <?php the_post_thumbnail('technama-card', array('alt' => get_the_title())); ?>
                                             <?php else : ?>
-                                                <img src="<?php echo esc_url(get_template_directory_uri()); ?>/assets/images/placeholder-card.jpg" alt="<?php the_title_attribute(); ?>">
+                                                <img src="<?php echo esc_url(get_template_directory_uri()); ?>/assets/images/placeholder-card.svg" alt="<?php the_title_attribute(); ?>">
                                             <?php endif; ?>
                                         </a>
                                         <?php if ($post_cat_name) : ?>
@@ -255,7 +255,7 @@ get_header();
                                         <?php if (has_post_thumbnail()) : ?>
                                             <?php the_post_thumbnail('technama-card', array('alt' => get_the_title())); ?>
                                         <?php else : ?>
-                                            <img src="<?php echo esc_url(get_template_directory_uri()); ?>/assets/images/placeholder-card.jpg" alt="<?php the_title_attribute(); ?>">
+                                            <img src="<?php echo esc_url(get_template_directory_uri()); ?>/assets/images/placeholder-card.svg" alt="<?php the_title_attribute(); ?>">
                                         <?php endif; ?>
                                     </a>
                                 </div>
