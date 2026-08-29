@@ -1,11 +1,15 @@
 <article class="tn-card" id="post-<?php the_ID(); ?>">
     <div class="tn-card-thumb">
         <a href="<?php the_permalink(); ?>">
-            <?php if (has_post_thumbnail()) : ?>
-                <?php the_post_thumbnail('technama-card', array('loading' => 'lazy')); ?>
-            <?php else : ?>
-                <img src="<?php echo esc_url(get_stylesheet_directory_uri()); ?>/assets/images/default-thumb.jpg" alt="<?php the_title_attribute(); ?>" loading="lazy">
-            <?php endif; ?>
+            <div class="post-thumbnail <?php echo !has_post_thumbnail() ? 'no-thumbnail' : ''; ?>">
+                <?php if (has_post_thumbnail()) : ?>
+                    <?php the_post_thumbnail('technama-card', array('loading' => 'lazy')); ?>
+                <?php else : ?>
+                    <div class="placeholder-image" aria-label="<?php echo esc_attr(get_the_title()); ?>">
+                        <span class="placeholder-icon">📰</span>
+                    </div>
+                <?php endif; ?>
+            </div>
         </a>
         <span class="tn-card-cat"><?php echo esc_html(technama_get_primary_category()); ?></span>
     </div>

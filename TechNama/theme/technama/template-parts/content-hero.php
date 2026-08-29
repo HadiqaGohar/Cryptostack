@@ -1,10 +1,14 @@
 <section class="tn-hero" id="hero-<?php the_ID(); ?>">
     <div class="tn-hero-bg">
-        <?php if (has_post_thumbnail()) : ?>
-            <?php the_post_thumbnail('full', array('loading' => 'eager')); ?>
-        <?php else : ?>
-            <img src="<?php echo esc_url(get_stylesheet_directory_uri()); ?>/assets/images/default-hero.jpg" alt="<?php the_title_attribute(); ?>" loading="eager">
-        <?php endif; ?>
+        <div class="post-thumbnail <?php echo !has_post_thumbnail() ? 'no-thumbnail' : ''; ?>">
+            <?php if (has_post_thumbnail()) : ?>
+                <?php the_post_thumbnail('full', array('loading' => 'eager')); ?>
+            <?php else : ?>
+                <div class="placeholder-image" aria-label="<?php echo esc_attr(get_the_title()); ?>">
+                    <span class="placeholder-icon">📰</span>
+                </div>
+            <?php endif; ?>
+        </div>
         <div class="tn-hero-overlay"></div>
     </div>
     <div class="tn-hero-content">

@@ -1,11 +1,15 @@
 <article id="post-<?php the_ID(); ?>" <?php post_class('tn-card tn-card-video'); ?> data-show-status="<?php echo esc_attr(get_post_meta(get_the_ID(), '_tn_show_status', true)); ?>">
     <div class="tn-card-thumb">
         <a href="<?php the_permalink(); ?>">
-            <?php if (has_post_thumbnail()) : ?>
-                <?php the_post_thumbnail('technama-card', array('loading' => 'lazy')); ?>
-            <?php else : ?>
-                <img src="<?php echo esc_url(get_stylesheet_directory_uri()); ?>/assets/images/default-thumb.jpg" alt="<?php the_title_attribute(); ?>" loading="lazy">
-            <?php endif; ?>
+            <div class="post-thumbnail <?php echo !has_post_thumbnail() ? 'no-thumbnail' : ''; ?>">
+                <?php if (has_post_thumbnail()) : ?>
+                    <?php the_post_thumbnail('technama-card', array('loading' => 'lazy')); ?>
+                <?php else : ?>
+                    <div class="placeholder-image" aria-label="<?php echo esc_attr(get_the_title()); ?>">
+                        <span class="placeholder-icon">📰</span>
+                    </div>
+                <?php endif; ?>
+            </div>
         </a>
         <span class="tn-card-play" aria-label="<?php esc_attr_e('Play video', 'technama'); ?>">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>

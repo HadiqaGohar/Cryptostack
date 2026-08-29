@@ -25,7 +25,7 @@ get_header();
     );
     $sticky_posts = get_option('sticky_posts');
     if (!empty($sticky_posts) && is_array($sticky_posts)) {
-        $featured_args['post__in'] = $sticky_posts;
+        $featured_args['post__in'] = array_keys($sticky_posts);
     }
     $hero_query = new WP_Query($featured_args);
     ?>
@@ -66,11 +66,11 @@ get_header();
 
                     <div class="hero-sidebar">
                         <?php
+                        $hero_main_id = get_the_ID();
                         $hero_side_args = array(
                             'posts_per_page'      => 2,
                             'post_status'         => 'publish',
                             'ignore_sticky_posts' => 1,
-                            'post__not_in'        => array(get_the_ID()),
                             'meta_query'          => array(
                                 array(
                                     'key'     => '_thumbnail_id',
@@ -79,7 +79,7 @@ get_header();
                             ),
                         );
                         if (!empty($sticky_posts) && is_array($sticky_posts)) {
-                            $hero_side_args['post__in'] = $sticky_posts;
+                            $hero_side_args['post__in'] = array_values(array_diff(array_keys($sticky_posts), array($hero_main_id)));
                         }
                         $hero_side_query = new WP_Query($hero_side_args);
 
@@ -162,7 +162,12 @@ get_header();
                 <section class="tn-latest-news" aria-label="<?php esc_attr_e('Latest News', 'technama'); ?>">
                     <div class="section-header">
                         <h2><?php esc_html_e('Latest News', 'technama'); ?></h2>
-                        <a href="<?php echo esc_url(get_permalink(get_option('page_for_posts'))); ?>" class="view-all">
+                        <?php
+                        $posts_page_id = get_option('page_for_posts');
+                        $view_all_url  = $posts_page_id ? get_permalink($posts_page_id) : get_post_type_archive_link('post');
+                        if (!$view_all_url) $view_all_url = home_url('/');
+                        ?>
+                        <a href="<?php echo esc_url($view_all_url); ?>" class="view-all">
                             <?php esc_html_e('View All', 'technama'); ?>
                         </a>
                     </div>
