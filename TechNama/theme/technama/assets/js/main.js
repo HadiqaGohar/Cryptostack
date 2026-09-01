@@ -227,7 +227,7 @@
 
         var originalText = submitBtn.textContent;
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Subscribing...';
+        submitBtn.innerHTML = '<span class="tn-spinner"></span>Subscribing...';
 
         var data = new FormData();
         data.append('action', 'tn_subscribe');
@@ -311,4 +311,16 @@
       history.pushState(null, null, hash);
     });
   }
+})();
+
+/* Reading Progress Bar */
+(function(){
+    var bar = document.getElementById('tn-reading-progress');
+    if (!bar || !document.querySelector('.post-content, article')) return;
+    window.addEventListener('scroll', function() {
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        var progress = (scrollTop / docHeight) * 100;
+        bar.style.width = Math.min(progress, 100) + '%';
+    });
 })();

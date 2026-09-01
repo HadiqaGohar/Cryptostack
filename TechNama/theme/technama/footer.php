@@ -114,10 +114,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- TechNama AdSense Auto-Ads -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
-    data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"></script>
 
+<?php get_template_part("template-parts/cookie-consent"); ?>
 <?php wp_footer(); ?>
 </body>
 </html>

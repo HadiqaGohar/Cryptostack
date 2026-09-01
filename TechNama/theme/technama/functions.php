@@ -1555,19 +1555,133 @@ add_action('wp_head', 'technama_video_object_schema', 5);
  */
 function technama_create_tables() {
     global $wpdb;
-    $table_name = $wpdb->prefix . 'newsletter_subscribers';
     $charset_collate = $wpdb->get_charset_collate();
     
-    $sql = "CREATE TABLE $table_name (
-        id mediumint(9) NOT NULL AUTO_INCREMENT,
-        email varchar(100) NOT NULL,
-        status varchar(20) NOT NULL DEFAULT 'active',
-        consent_date datetime NOT NULL,
+    // Newsletter subscribers table
+    $table_subscribers = $wpdb->prefix . 'tn_newsletter_subscribers';
+    $sql_subscribers = "CREATE TABLE IF NOT EXISTS $table_subscribers (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        email varchar(255) NOT NULL,
+        status varchar(20) DEFAULT 'active',
+        consent tinyint(1) DEFAULT 0,
+        consent_date datetime DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
-        UNIQUE KEY email (email)
+        UNIQUE KEY email (email),
+        KEY status (status)
+    ) $charset_collate;";
+    
+    // User bookmarks table
+    $table_bookmarks = $wpdb->prefix . 'tn_user_bookmarks';
+    $sql_bookmarks = "CREATE TABLE IF NOT EXISTS $table_bookmarks (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        user_id int(11) NOT NULL,
+        post_id int(11) NOT NULL,
+        bookmark_date datetime DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY user_id (user_id),
+        KEY post_id (post_id),
+        UNIQUE KEY user_post (user_id, post_id)
+    ) $charset_collate;";
+    
+    // Analytics pageviews table
+    $table_analytics = $wpdb->prefix . 'tn_analytics_pageviews';
+    $sql_analytics = "CREATE TABLE IF NOT EXISTS $table_analytics (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        post_id int(11) DEFAULT NULL,
+        page_url varchar(500) NOT NULL,
+        user_id int(11) DEFAULT NULL,
+        ip_address varchar(45) DEFAULT NULL,
+        user_agent text,
+        referrer varchar(500) DEFAULT NULL,
+        view_date date NOT NULL,
+        view_time time NOT NULL,
+        session_id varchar(64) DEFAULT NULL,
+        is_unique tinyint(1) DEFAULT 1,
+        country varchar(100) DEFAULT NULL,
+        device_type varchar(20) DEFAULT NULL,
+        browser varchar(50) DEFAULT NULL,
+        os varchar(50) DEFAULT NULL,
+        PRIMARY KEY (id),
+        KEY post_id (post_id),
+        KEY page_url (page_url(191)),
+        KEY user_id (user_id),
+        KEY view_date (view_date),
+        KEY session_id (session_id)
+    ) $charset_collate;";
+    
+    // Press release submissions table
+    $table_press = $wpdb->prefix . 'tn_press_release_submissions';
+    $sql_press = "CREATE TABLE IF NOT EXISTS $table_press (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        company_name varchar(255) NOT NULL,
+        contact_name varchar(255) NOT NULL,
+        contact_email varchar(255) NOT NULL,
+        contact_phone varchar(50) DEFAULT NULL,
+        title varchar(500) NOT NULL,
+        content longtext NOT NULL,
+        attachment_url varchar(500) DEFAULT NULL,
+        review_status enum('pending','approved','rejected','published') DEFAULT 'pending',
+        reviewer_notes text DEFAULT NULL,
+        submitted_date datetime DEFAULT CURRENT_TIMESTAMP,
+        reviewed_date datetime DEFAULT NULL,
+        published_post_id int(11) DEFAULT NULL,
+        PRIMARY KEY (id),
+        KEY review_status (review_status),
+        KEY submitted_date (submitted_date)
+    ) $charset_collate;";
+    
+    // Sponsor campaigns table
+    $table_sponsor = $wpdb->prefix . 'tn_sponsor_campaigns';
+    $sql_sponsor = "CREATE TABLE IF NOT EXISTS $table_sponsor (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        sponsor_name varchar(255) NOT NULL,
+        sponsor_url varchar(500) DEFAULT NULL,
+        image_url varchar(500) DEFAULT NULL,
+        alt_text varchar(255) DEFAULT NULL,
+        placement enum('header','sidebar','footer','inline') DEFAULT 'sidebar',
+        start_date date DEFAULT NULL,
+        end_date date DEFAULT NULL,
+        impressions int(11) DEFAULT 0,
+        clicks int(11) DEFAULT 0,
+        status enum('active','paused','expired','scheduled') DEFAULT 'active',
+        priority int(11) DEFAULT 0,
+        notes text DEFAULT NULL,
+        created_date datetime DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY placement (placement),
+        KEY start_date (start_date),
+        KEY status (status)
+    ) $charset_collate;";
+    
+    // Show episodes table
+    $table_episodes = $wpdb->prefix . 'tn_show_episodes';
+    $sql_episodes = "CREATE TABLE IF NOT EXISTS $table_episodes (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        show_title varchar(255) NOT NULL,
+        episode_number int(11) DEFAULT 1,
+        guest_name varchar(255) DEFAULT NULL,
+        guest_title varchar(255) DEFAULT NULL,
+        guest_avatar varchar(500) DEFAULT NULL,
+        description text DEFAULT NULL,
+        youtube_id varchar(50) DEFAULT NULL,
+        duration varchar(20) DEFAULT NULL,
+        schedule_date datetime DEFAULT NULL,
+        status enum('scheduled','live','recorded','published','archived') DEFAULT 'scheduled',
+        view_count int(11) DEFAULT 0,
+        download_count int(11) DEFAULT 0,
+        created_date datetime DEFAULT CURRENT_TIMESTAMP,
+        updated_date datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY schedule_date (schedule_date),
+        KEY status (status)
     ) $charset_collate;";
     
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-    dbDelta($sql);
+    dbDelta($sql_subscribers);
+    dbDelta($sql_bookmarks);
+    dbDelta($sql_analytics);
+    dbDelta($sql_press);
+    dbDelta($sql_sponsor);
+    dbDelta($sql_episodes);
 }
 add_action('after_switch_theme', 'technama_create_tables');

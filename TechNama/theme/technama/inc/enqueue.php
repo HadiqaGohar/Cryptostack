@@ -306,3 +306,19 @@ gtag('config', '<?php echo esc_js( $ga_id ); ?>');
     <?php
 }
 add_action('wp_head', 'technama_google_analytics', 1);
+
+/**
+ * Conditional AdSense Auto-Ads loading
+ * Only loads when a real publisher ID is configured in Customizer
+ */
+function technama_adsense_load() {
+    $adsense_id = get_theme_mod('technama_adsense_pub_id', '');
+    if (empty($adsense_id) || $adsense_id === 'ca-pub-XXXXXXXXXXXXXXXX') {
+        return; // Don't load placeholder
+    }
+    ?>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
+    data-ad-client="<?php echo esc_attr($adsense_id); ?>"></script>
+    <?php
+}
+add_action('wp_head', 'technama_adsense_load', 5);

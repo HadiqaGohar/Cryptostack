@@ -15,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     <?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
+    <div class="tn-reading-progress" id="tn-reading-progress"></div>
 <?php wp_body_open(); ?>
 
 <!-- Skip to content for accessibility -->
