@@ -1,15 +1,34 @@
-# Environment
+# Environment files
 .env
+**/.env
+**/config.env
 
-# WordPress (managed by Docker)
-TechNama/wordpress/
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-# OS
+# WordPress
+wp-content/plugins/
+wp-content/uploads/
+wp-content/cache/
+wp-content/upgrade/
+
+# SSL/Keys
+ssl/
+*.pem
+*.key
+*.crt
+
+# OS files
 .DS_Store
 Thumbs.db
 
 # Logs
 *.log
-
-# Backups
 backups/
+
+# Pipeline data (contains dedup hashes, not secrets)
+!pipeline/data/seen_articles.json
+!pipeline/data/seen_images.json

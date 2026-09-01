@@ -8,17 +8,125 @@ import json
 import time
 import hashlib
 import re
-from datetime import datetime, timedelta
-from config import NEWSAPI_KEY, DATA_DIR
 import os
+from datetime import datetime, timedelta
+from urllib.parse import urlparse, urljoin
+from config import NEWSAPI_KEY, DATA_DIR
 
 GOOGLE_NEWS_RSS = {
-    'tech': 'https://news.google.com/rss/search?q=technology+news+pakistan&hl=en-PK&gl=PK&ceid=PK:en',
-    'ai': 'https://news.google.com/rss/search?q=artificial+intelligence+cloud+computing&hl=en-PK&gl=PK&ceid=PK:en',
-    'cyber': 'https://news.google.com/rss/search?q=cybersecurity+hacking+security&hl=en-PK&gl=PK&ceid=PK:en',
-    'startups': 'https://news.google.com/rss/search?q=startup+funding+entrepreneurship&hl=en-PK&gl=PK&ceid=PK:en',
-    'reviews': 'https://news.google.com/rss/search?q=tech+review+gadget+smartphone+laptop&hl=en-PK&gl=PK&ceid=PK:en',
+    'tech': 'https://news.google.com/rss/search?q=technology+software+digital+Pakistan&hl=en-PK&gl=PK&ceid=PK:en',
+    'ai': 'https://news.google.com/rss/search?q=artificial+intelligence+machine+learning+cloud+computing+Pakistan&hl=en-PK&gl=PK&ceid=PK:en',
+    'cyber': 'https://news.google.com/rss/search?q=cybersecurity+hacking+security+vulnerability+Pakistan&hl=en-PK&gl=PK&ceid=PK:en',
+    'startups': 'https://news.google.com/rss/search?q=tech+startup+funding+entrepreneurship+Pakistan&hl=en-PK&gl=PK&ceid=PK:en',
+    'reviews': 'https://news.google.com/rss/search?q=technology+review+gadget+smartphone+laptop+Pakistan&hl=en-PK&gl=PK&ceid=PK:en',
 }
+
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+}
+
+
+def _normalize_image_url(img_url, page_url):
+    """Normalize an image URL relative to the page URL.
+    Handles protocol-relative (//), root-relative (/), and plain URLs.
+    Returns a fully-qualified absolute URL or None if invalid."""
+    if not img_url:
+        return None
+    img_url = img_url.strip()
+    if img_url.startswith('//'):
+        return 'https:' + img_url
+    if img_url.startswith('http://') or img_url.startswith('https://'):
+        return img_url
+    if img_url.startswith('/'):
+        parsed = urlparse(page_url)
+        return f"{parsed.scheme}://{parsed.netloc}{img_url}"
+    # Relative URL without leading slash
+    return urljoin(page_url, img_url)
+
+
+def _url_has_image_extension(url):
+    """Check if a URL (possibly with query params) ends with a known image extension."""
+    parsed = urlparse(url)
+    path_lower = parsed.path.lower()
+    return any(path_lower.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg', '.bmp', '.tiff'])
+
+
+def extract_image_from_url(url):
+    """Fetch an article page and extract its main image via og:image or first img tag.
+    Normalizes all returned URLs to absolute form."""
+    try:
+        resp = requests.get(url, headers=HEADERS, timeout=10, allow_redirects=True)
+        if resp.status_code != 200:
+            return None
+        html = resp.text
+        # Try og:image
+        og_match = re.search(r'<meta[^>]*content=["\']([^"\']+)["\'][^>]*property=["\']og:image["\']', html, re.IGNORECASE) or re.search(r'<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']', html, re.IGNORECASE)
+        if og_match:
+            return _normalize_image_url(og_match.group(1), url)
+        # Try twitter:image
+        tw_match = re.search(r'<meta[^>]*name=["\']twitter:image["\'][^>]*content=["\']([^"\']+)["\']', html, re.IGNORECASE)
+        if tw_match:
+            return _normalize_image_url(tw_match.group(1), url)
+        # Try twitter:image:src
+        tw2_match = re.search(r'<meta[^>]*name=["\']twitter:image:src["\'][^>]*content=["\']([^"\']+)["\']', html, re.IGNORECASE)
+        if tw2_match:
+            return _normalize_image_url(tw2_match.group(1), url)
+        # Try <link rel="image_src">
+        link_match = re.search(r'<link[^>]*rel=["\']image_src["\'][^>]*href=["\']([^"\']+)["\']', html, re.IGNORECASE) or re.search(r'<link[^>]*href=["\']([^"\']+)["\'][^>]*rel=["\']image_src["\']', html, re.IGNORECASE)
+        if link_match:
+            return _normalize_image_url(link_match.group(1), url)
+        # Try itemprop="image" meta tag
+        itemprop_match = re.search(r'<meta[^>]*itemprop=["\']image["\'][^>]*content=["\']([^"\']+)["\']', html, re.IGNORECASE) or re.search(r'<meta[^>]*content=["\']([^"\']+)["\'][^>]*itemprop=["\']image["\']', html, re.IGNORECASE)
+        if itemprop_match:
+            return _normalize_image_url(itemprop_match.group(1), url)
+        # Try first article/hero image
+        img_match = re.search(r'<img[^>]*src=["\']([^"\']+\.(jpg|jpeg|png|webp|gif))["\']', html, re.IGNORECASE)
+        if img_match:
+            return _normalize_image_url(img_match.group(1), url)
+        return None
+    except Exception as e:
+        print(f"  [Image Extract Error] {e}")
+        return None
+
+
+def download_image(url, filename):
+    # Reject generic thumbnails
+    if _is_generic_thumbnail(url):
+        return None
+    """Download an image and save it locally. Returns filepath or None.
+    Handles protocol-relative, root-relative, and query-parameter URLs."""
+    try:
+        if not url or not filename:
+            return None
+        # Normalize URL
+        if url.startswith('//'):
+            url = 'https:' + url
+        resp = requests.get(url, headers=HEADERS, timeout=15, stream=True)
+        if resp.status_code != 200:
+            resp.close()
+            return None
+        content_type = resp.headers.get('content-type', '')
+        # Use urlparse to check the path (ignoring query params) for extension fallback
+        if 'image' not in content_type and not _url_has_image_extension(url):
+            resp.close()
+            return None
+        images_dir = os.path.join(DATA_DIR, 'images')
+        os.makedirs(images_dir, exist_ok=True)
+        filepath = os.path.join(images_dir, filename)
+        with open(filepath, 'wb') as f:
+            for chunk in resp.iter_content(8192):
+                f.write(chunk)
+        resp.close()
+        size = os.path.getsize(filepath)
+        if size > 15000:
+            return filepath
+        else:
+            os.remove(filepath)
+            return None
+    except Exception as e:
+        print(f"  [Download Error] {e}")
+        return None
+
 
 def fetch_google_news_rss(category='tech', max_results=10):
     url = GOOGLE_NEWS_RSS.get(category, GOOGLE_NEWS_RSS['tech'])
@@ -30,6 +138,17 @@ def fetch_google_news_rss(category='tech', max_results=10):
         description = entry.get('summary', '')
         pub_date = entry.get('published', '')
         source = entry.get('source', {}).get('title', 'Google News') if hasattr(entry, 'source') else 'Google News'
+
+        if not title:
+            continue
+
+        # Try to extract image from the article URL
+        image_url = None
+        if link:
+            image_url = extract_image_from_url(link)
+            time.sleep(0.3)
+
+        article_hash = hashlib.md5(f"{title}{link}".encode()).hexdigest()
         article = {
             'title': title,
             'url': link,
@@ -37,7 +156,9 @@ def fetch_google_news_rss(category='tech', max_results=10):
             'pub_date': pub_date,
             'source': source,
             'category': category,
-            'hash': hashlib.md5(f"{title}{link}".encode()).hexdigest(),
+            'image_url': image_url,
+            'hash': article_hash,
+            'has_real_image': bool(image_url),
         }
         articles.append(article)
     return articles
@@ -46,11 +167,11 @@ def fetch_newsapi(category='technology', page_size=10):
     if not NEWSAPI_KEY or NEWSAPI_KEY == 'will-be-set-later':
         return []
     query_map = {
-        'technology': 'technology OR IT OR software',
-        'ai': 'artificial intelligence OR machine learning OR cloud computing',
-        'cybersecurity': 'cybersecurity OR hacking OR security vulnerability',
-        'startups': 'startup OR funding OR entrepreneurship',
-        'reviews': 'tech review OR gadget OR smartphone OR laptop',
+        'technology': 'Pakistan technology IT software digital',
+        'ai': 'Pakistan artificial intelligence machine learning cloud',
+        'cybersecurity': 'Pakistan cybersecurity hacking security',
+        'startups': 'Pakistan startup funding entrepreneurship',
+        'reviews': 'Pakistan technology review gadget smartphone laptop',
     }
     query = query_map.get(category, 'technology')
     params = {
@@ -66,14 +187,30 @@ def fetch_newsapi(category='technology', page_size=10):
         data = resp.json()
         articles = []
         for item in data.get('articles', []):
+            title = item.get('title', '').strip()
+            url = item.get('url', '')
+            if not title:
+                continue
+            # NewsAPI often provides urlToImage directly
+            image_url = item.get('urlToImage')
+            # Normalize NewsAPI image URLs
+            if image_url:
+                image_url = _normalize_image_url(image_url, url or image_url)
+            # If NewsAPI doesn't provide image, try fetching from article page
+            if not image_url and url:
+                image_url = extract_image_from_url(url)
+                time.sleep(0.3)
+            article_hash = hashlib.md5(f"{title}{url}".encode()).hexdigest()
             article = {
-                'title': item.get('title', '').strip(),
-                'url': item.get('url', ''),
+                'title': title,
+                'url': url,
                 'description': (item.get('description') or '')[:500],
                 'pub_date': item.get('publishedAt', ''),
                 'source': item.get('source', {}).get('name', 'NewsAPI'),
                 'category': category,
-                'hash': hashlib.md5(f"{item.get('title','')}{item.get('url','')}".encode()).hexdigest(),
+                'image_url': image_url,
+                'hash': article_hash,
+                'has_real_image': bool(image_url),
             }
             articles.append(article)
         return articles
@@ -112,6 +249,27 @@ def fetch_all_news():
                 seen.add(a['hash'])
         time.sleep(1)
     save_seen_hashes(seen)
+
+    # Download images for articles that have image URLs
+    for article in all_articles:
+        if article.get('image_url'):
+            ext = '.jpg'
+            img_url = article['image_url'].lower()
+            if '.png' in img_url:
+                ext = '.png'
+            elif '.webp' in img_url:
+                ext = '.webp'
+            elif '.gif' in img_url:
+                ext = '.gif'
+            filename = f"{article['hash']}{ext}"
+            local_path = download_image(article['image_url'], filename)
+            if local_path:
+                article['local_image_path'] = local_path
+            else:
+                article['local_image_path'] = None
+        else:
+            article['local_image_path'] = None
+
     return all_articles
 
 if __name__ == '__main__':
@@ -119,3 +277,26 @@ if __name__ == '__main__':
     print(f"[{datetime.now()}] Fetched {len(articles)} new articles")
     for a in articles[:5]:
         print(f"  - {a['title']} ({a['source']})")
+
+
+def _is_generic_thumbnail(url):
+    """Reject generic/placeholder thumbnails from Google News and other aggregators."""
+    if not url:
+        return False
+    url_lower = url.lower()
+    generic_patterns = [
+        'lh3.googleusercontent.com',
+        'news.google.com/__i/rss',
+        'news.google.com/rss/thumbnails',
+        '=s0-w300',
+        '=s0-w200',
+        '=s0-w100',
+        'google.com/images/branding',
+        'gstatic.com/images',
+        'gnews.com/thumb',
+        'ssl.gstatic.com',
+    ]
+    for pattern in generic_patterns:
+        if pattern in url_lower:
+            return True
+    return False

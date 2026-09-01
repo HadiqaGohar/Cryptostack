@@ -15,7 +15,13 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <!-- Column 1: About -->
                 <div class="tn-footer-col">
                     <div class="tn-footer-logo">
-                        <span class="tn-logo-name">Tech<span class="tn-logo-accent">Nama</span></span>
+                        <a href="<?php echo esc_url(home_url('/')); ?>" aria-label="<?php echo esc_attr( get_bloginfo('name') ); ?>">
+                            <?php if (has_custom_logo()) : ?>
+                                <?php the_custom_logo(); ?>
+                            <?php else : ?>
+                                <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/logo.svg' ); ?>" alt="<?php echo esc_attr( get_bloginfo('name') ); ?>" class="tn-footer-logo-img">
+                            <?php endif; ?>
+                        </a>
                     </div>
                     <p class="tn-footer-desc"><?php esc_html_e("Pakistan's leading technology news portal covering IT news, startups, cybersecurity, AI & cloud computing.", 'technama'); ?></p>
                     <div class="tn-footer-social">
@@ -66,6 +72,7 @@ $social_youtube = get_theme_mod('technama_social_youtube', '');
                     <form class="tn-newsletter-form" id="tn-newsletter-form" data-ajax="tn_subscribe">
                         <input type="email" name="email" placeholder="<?php esc_attr_e('Your email address', 'technama'); ?>" required />
                         <button type="submit" class="tn-btn tn-btn-primary"><?php esc_html_e('Subscribe', 'technama'); ?></button>
+                        <div class="tn-newsletter-message" style="display:none;"></div>
                     </form>
                 </div>
             </div>
@@ -103,36 +110,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!btn) return;
     window.addEventListener('scroll', function() {
         btn.classList.toggle('visible', window.scrollY > 400);
-    });
-});
-document.querySelectorAll('.tn-newsletter-form[data-ajax]').forEach(function(form) {
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        var email = form.querySelector('input[name="email"]').value;
-        var btn = form.querySelector('button[type="submit"]');
-        var origText = btn.textContent;
-        btn.textContent = '...';
-        btn.disabled = true;
-        var data = new FormData();
-        data.append('action', 'tn_subscribe');
-        data.append('email', email);
-        data.append('nonce', typeof tn_share_vars !== 'undefined' ? tn_share_vars.nonce : '');
-        fetch(typeof tn_share_vars !== 'undefined' ? tn_share_vars.ajax_url : '/wp-admin/admin-ajax.php', {
-            method: 'POST',
-            body: data,
-        }).then(function(r) { return r.json(); }).then(function(res) {
-            btn.textContent = origText;
-            btn.disabled = false;
-            if (res.success) {
-                form.innerHTML = '<p style="color:#22c55e;font-weight:600;">' + res.data.message + '</p>';
-            } else {
-                alert(res.data && res.data.message ? res.data.message : 'Subscription failed.');
-            }
-        }).catch(function() {
-            btn.textContent = origText;
-            btn.disabled = false;
-            alert('Network error. Please try again.');
-        });
     });
 });
 </script>

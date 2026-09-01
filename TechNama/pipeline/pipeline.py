@@ -7,9 +7,11 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from datetime import datetime
 from real_fetcher import fetch_all_real
+from news_fetcher import fetch_all_news
 from topic_guardrails import is_topic_allowed
 from groq_rewriter import rewrite_article
-from wordpress_poster import post_via_mysql, get_or_create_category, upload_featured_image
+from wordpress_poster import post_via_mysql, get_or_create_category, upload_featured_image, get_featured_image_for_category
+from brevo_sender import send_newsletter
 import json
 import logging
 
@@ -36,8 +38,25 @@ def run_pipeline():
     logger.info(f"PIPELINE RUN: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     logger.info("=" * 60)
     
+    # Fetch from primary Pakistani RSS feeds (with real images)
     articles = fetch_all_real()
-    logger.info(f"Fetched {len(articles)} raw articles")
+    logger.info(f"Fetched {len(articles)} articles from Pakistani RSS feeds")
+    
+    # Also fetch from Google News RSS + NewsAPI for more Pakistan-specific content
+    try:
+        extra_articles = fetch_all_news()
+        logger.info(f"Fetched {len(extra_articles)} additional articles from Google News/NewsAPI")
+        
+        # Merge extra articles, avoiding duplicates by hash
+        seen_hashes = {a['hash'] for a in articles}
+        for ea in extra_articles:
+            if ea['hash'] not in seen_hashes:
+                articles.append(ea)
+                seen_hashes.add(ea['hash'])
+    except Exception as e:
+        logger.warning(f"Error fetching from Google News/NewsAPI: {e}")
+    
+    logger.info(f"Total articles after merge: {len(articles)}")
     
     with_img = sum(1 for a in articles if a.get('has_real_image'))
     logger.info(f"Articles with real images: {with_img}/{len(articles)}")
@@ -56,6 +75,7 @@ def run_pipeline():
     posted = 0
     failed = 0
     draft = 0
+    newsletters_sent = 0
     max_articles = 10
     
     for article in filtered[:max_articles]:
@@ -83,7 +103,14 @@ def run_pipeline():
             if featured_image_id:
                 logger.info(f"  -> Uploaded image (ID: {featured_image_id})")
             else:
-                logger.warning(f"  -> Image upload failed, using no featured image")
+                logger.warning(f"  -> Image upload failed, trying category fallback image")
+        
+        # Fallback: use category-based featured image if upload failed or no image
+        if not featured_image_id:
+            fallback_id = get_featured_image_for_category(category_slug)
+            if fallback_id:
+                featured_image_id = fallback_id
+                logger.info(f"  -> Using category fallback image (ID: {featured_image_id})")
         
         full_content = rewritten['body'] + source_citation
         
@@ -105,12 +132,28 @@ def run_pipeline():
             else:
                 posted += 1
                 logger.info(f"  -> PUBLISHED (ID: {result['id']})")
+                
+                # Send newsletter to subscribers
+                try:
+                    newsletter_sent = send_newsletter(
+                        post_id=result['id'],
+                        title=rewritten['headline'],
+                        excerpt=article['description'],
+                        category=category_slug,
+                        image_url=article.get('image_url', ''),
+                        article_url=f"{WP_URL}/?p={result['id']}"
+                    )
+                    if newsletter_sent:
+                        newsletters_sent += 1
+                        logger.info(f"  -> NEWSLETTER SENT to subscribers")
+                except Exception as e:
+                    logger.warning(f"  -> Newsletter send failed: {e}")
         else:
             failed += 1
             logger.error(f"  -> FAILED: {result['status']}")
     
     logger.info("=" * 60)
-    logger.info(f"PIPELINE COMPLETE: {posted} published, {draft} drafts, {failed} failed")
+    logger.info(f"PIPELINE COMPLETE: {posted} published, {draft} drafts, {failed} failed, {newsletters_sent} newsletters sent")
     logger.info("=" * 60)
     
     return {
@@ -119,7 +162,8 @@ def run_pipeline():
         'rejected': len(rejected),
         'published': posted,
         'drafts': draft,
-        'failed': failed
+        'failed': failed,
+        'newsletters_sent': newsletters_sent
     }
 
 if __name__ == '__main__':

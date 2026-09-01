@@ -286,13 +286,13 @@ get_header();
 
             <aside class="tn-sidebar tn-homepage-sidebar" role="complementary">
 
-                <?php $newsletter_url = get_theme_mod('technama_newsletter_url', '#'); ?>
                 <div class="widget widget_newsletter">
                     <h3 class="widget-title"><?php esc_html_e('Newsletter', 'technama'); ?></h3>
                     <p><?php esc_html_e('Get the latest tech news delivered to your inbox.', 'technama'); ?></p>
-                    <form action="<?php echo esc_url($newsletter_url); ?>" method="post" target="_blank" rel="noopener" class="newsletter-form">
-                        <input type="email" name="EMAIL" placeholder="<?php esc_attr_e('Your email address', 'technama'); ?>" required aria-label="<?php esc_attr_e('Email address', 'technama'); ?>">
+                    <form class="tn-newsletter-form" data-ajax="tn_subscribe">
+                        <input type="email" name="email" placeholder="<?php esc_attr_e('Your email address', 'technama'); ?>" required aria-label="<?php esc_attr_e('Email address', 'technama'); ?>">
                         <button type="submit" class="btn btn-primary btn-sm"><?php esc_html_e('Subscribe Now', 'technama'); ?></button>
+                        <div class="tn-newsletter-message" style="display:none;"></div>
                     </form>
                 </div>
 

@@ -230,11 +230,11 @@
         submitBtn.textContent = 'Subscribing...';
 
         var data = new FormData();
-        data.append('action', 'tn_newsletter_subscribe');
+        data.append('action', 'tn_subscribe');
         data.append('email', email);
-        data.append('nonce', typeof tnNewsletter !== 'undefined' ? tnNewsletter.nonce : '');
+        data.append('nonce', typeof technamaAjax !== 'undefined' ? technamaAjax.nonce : '');
 
-        fetch(typeof tnNewsletter !== 'undefined' ? tnNewsletter.ajax_url : '/wp-admin/admin-ajax.php', {
+        fetch(typeof technamaAjax !== 'undefined' ? technamaAjax.ajaxurl : '/wp-admin/admin-ajax.php', {
           method: 'POST',
           body: data,
           credentials: 'same-origin'
@@ -250,8 +250,9 @@
               showMessage(messageEl, result.data.message || 'Something went wrong. Please try again.', 'error');
             }
           })
-          .catch(function () {
-            showMessage(messageEl, 'Network error. Please try again later.', 'error');
+          .catch(function (err) {
+            console.error('[Newsletter AJAX]', err);
+            showMessage(messageEl, 'Something went wrong. Please try again.', 'error');
           })
           .finally(function () {
             submitBtn.disabled = false;

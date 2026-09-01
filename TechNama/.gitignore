@@ -1,12 +1,30 @@
+# Environment & Secrets
+.env
+**/.env
+**/config.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# WordPress
 wp-content/plugins/
 wp-content/uploads/
 wp-content/cache/
 wp-content/upgrade/
-.env
+wp-content/backups/
+
+# SSL/Keys
 ssl/
 *.pem
 *.key
+*.crt
+
+# OS files
 .DS_Store
 Thumbs.db
+
+# Logs
 *.log
 backups/

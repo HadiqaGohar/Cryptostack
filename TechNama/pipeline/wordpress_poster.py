@@ -13,7 +13,7 @@ from config import WP_URL, WP_USER, WP_APP_PASSWORD, MYSQL_HOST, MYSQL_USER, MYS
 
 def upload_featured_image(image_path, title='Featured Image'):
     """Upload an image to WordPress and return the attachment ID"""
-    if not os.path.exists(image_path):
+    if not image_path or not os.path.exists(image_path):
         print(f"[Image Upload] File not found: {image_path}")
         return None
 
@@ -51,37 +51,58 @@ def upload_featured_image(image_path, title='Featured Image'):
         with open(image_path, 'rb') as f:
             image_data = f.read()
 
+        # Determine upload path
+        upload_path = datetime.now().strftime('%Y/%m')
+
         # Insert attachment
         cursor.execute("""
             INSERT INTO wp_posts (post_author, post_date, post_date_gmt, post_content,
                                   post_title, post_excerpt, post_status, post_type, post_name,
                                   comment_status, ping_status, menu_order, to_ping, pinged,
-                                  post_modified, post_modified_gmt, post_content_filtered, guid)
+                                  post_modified, post_modified_gmt, post_content_filtered, guid,
+                                  post_mime_type)
             VALUES (1, %s, %s, '', %s, '', 'inherit', 'attachment', %s, 'open', 'open',
-                    0, '', '', %s, %s, '', %s)
-        """, (now, now, title, filename, now, now, f"{WP_URL}/?attachment_id=0"))
+                    0, '', '', %s, %s, '', %s, %s)
+        """, (now, now, title, filename, now, now, f"{WP_URL}/?attachment_id=0", mime_type))
         attachment_id = cursor.lastrowid
 
-        # Update guid with actual ID
-        guid = f"{WP_URL}/wp-content/uploads/{filename}"
+        # Update guid with actual ID and correct path
+        guid = f"{WP_URL}/wp-content/uploads/{upload_path}/{filename}"
         cursor.execute("UPDATE wp_posts SET guid = %s WHERE ID = %s", (guid, attachment_id))
 
-        # Set attachment metadata
+        # Copy file to WordPress container
+        try:
+            container_path = f'/var/www/html/wp-content/uploads/{upload_path}/{filename}'
+            result = subprocess.run(['docker', 'cp', image_path, f'technama-wordpress:{container_path}'], 
+                                  check=True, capture_output=True, text=True)
+            print(f"  Copied image to container: {container_path}")
+        except Exception as e:
+            print(f"  WARNING: Failed to copy image to container: {e}")
+
+        # Set attachment metadata with dimensions
+        try:
+            from PIL import Image as PILImage
+            with PILImage.open(image_path) as img:
+                width, height = img.size
+        except:
+            width, height = 800, 450
+        full_upload_path = f'{upload_path}/{filename}'
+        meta_value = f'a:5:{{s:5:"width";i:{width};s:6:"height";i:{height};s:14:"hwstring_small";s:{len(str(height)+"x"+str(width))}:"{height}x{width}";s:4:"file";s:{len(full_upload_path)}:"{full_upload_path}";s:10:"sizes";a:0:{{}}}}'
         cursor.execute("""
             INSERT INTO wp_postmeta (post_id, meta_key, meta_value)
             VALUES (%s, '_wp_attachment_metadata', %s)
-        """, (attachment_id, f'a:0:{{}}'))
+        """, (attachment_id, meta_value))
 
         cursor.execute("""
             INSERT INTO wp_postmeta (post_id, meta_key, meta_value)
             VALUES (%s, '_wp_attached_file', %s)
-        """, (attachment_id, filename))
+        """, (attachment_id, f'{upload_path}/{filename}'))
 
-        # Store image data in _wp_attached_file_url for reference
+        # Store the web-accessible URL for reference (not the local filesystem path)
         cursor.execute("""
             INSERT INTO wp_postmeta (post_id, meta_key, meta_value)
             VALUES (%s, 'technama_image_url', %s)
-        """, (attachment_id, image_path))
+        """, (attachment_id, guid))
 
         conn.commit()
         cursor.close()

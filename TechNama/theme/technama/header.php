@@ -67,11 +67,6 @@ $social_youtube = get_theme_mod('technama_social_youtube', '');
                         </a>
                     </div>
 
-                    <!-- Header Ad Banner -->
-                    <div class="tn-header-ad">
-                        <!-- Sponsor 728x90 placement -->
-                    </div>
-
                     <!-- Search & Actions -->
                     <div class="tn-header-actions">
                         <button class="tn-search-toggle" aria-label="<?php esc_attr_e('Search', 'technama'); ?>">

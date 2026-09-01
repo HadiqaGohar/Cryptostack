@@ -1,6 +1,6 @@
 """
-Real Content Fetcher - Fetches actual articles with their real images
-Uses direct RSS feeds from tech publications + image extraction
+Real Content Fetcher - Fetches actual Pakistani tech articles with real images
+Uses RSS feeds from Pakistani tech publications + image extraction
 """
 import feedparser
 import requests
@@ -17,65 +17,89 @@ HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 }
 
-# Direct RSS feeds that give real article URLs and often include images
+# Pakistani tech RSS feeds - primary sources with real images
 DIRECT_RSS_FEEDS = {
     'tech': [
-        ('TechCrunch', 'https://techcrunch.com/feed/'),
-        ('The Verge', 'https://www.theverge.com/rss/index.xml'),
-        ('Ars Technica', 'https://feeds.arstechnica.com/arstechnica/index'),
-        ('Engadget', 'https://www.engadget.com/rss.xml'),
-        ('Wired', 'https://www.wired.com/feed/rss'),
+        ('ProPakistani Tech', 'https://propakistani.pk/category/tech-and-telecom/feed/'),
+        ('TechJuice', 'https://www.techjuice.pk/feed/'),
+        ('ProPakistani', 'https://propakistani.pk/feed/'),
     ],
     'ai': [
-        ('TechCrunch AI', 'https://techcrunch.com/category/artificial-intelligence/feed/'),
-        ('The Verge AI', 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml'),
-        ('MIT Tech Review AI', 'https://www.technologyreview.com/feed/'),
+        ('ProPakistani Tech', 'https://propakistani.pk/category/tech-and-telecom/feed/'),
+        ('TechJuice', 'https://www.techjuice.pk/feed/'),
     ],
     'cyber': [
-        ('Krebs on Security', 'https://krebsonsecurity.com/feed/'),
-        ('The Hacker News', 'https://feeds.feedburner.com/TheHackersNews'),
-        ('BleepingComputer', 'https://www.bleepingcomputer.com/feed/'),
+        ('ProPakistani Tech', 'https://propakistani.pk/category/tech-and-telecom/feed/'),
+        ('TechJuice', 'https://www.techjuice.pk/feed/'),
     ],
     'startups': [
-        ('TechCrunch Startups', 'https://techcrunch.com/category/startups/feed/'),
-        ('Crunchbase News', 'https://news.crunchbase.com/feed/'),
+        ('ProPakistani Startups', 'https://propakistani.pk/category/startups/feed/'),
+        ('TechJuice', 'https://www.techjuice.pk/feed/'),
     ],
     'reviews': [
-        ('The Verge Reviews', 'https://www.theverge.com/rss/reviews/index.xml'),
-        ('Wired Reviews', 'https://www.wired.com/feed/tag/reviews/latest/rss'),
-        ('Engadget Reviews', 'https://www.engadget.com/rss.xml'),
+        ('ProPakistani Tech', 'https://propakistani.pk/category/tech-and-telecom/feed/'),
+        ('TechJuice', 'https://www.techjuice.pk/feed/'),
     ],
 }
 
-# Google News RSS as fallback (gives titles + descriptions but no direct URLs)
+# Google News RSS for Pakistan tech news (supplementary)
 GOOGLE_NEWS_RSS = {
     'tech': 'https://news.google.com/rss/search?q=technology+news+pakistan&hl=en-PK&gl=PK&ceid=PK:en',
-    'ai': 'https://news.google.com/rss/search?q=artificial+intelligence+cloud+computing&hl=en-PK&gl=PK&ceid=PK:en',
-    'cyber': 'https://news.google.com/rss/search?q=cybersecurity+hacking+security&hl=en-PK&gl=PK&ceid=PK:en',
-    'startups': 'https://news.google.com/rss/search?q=startup+funding+entrepreneurship&hl=en-PK&gl=PK&ceid=PK:en',
-    'reviews': 'https://news.google.com/rss/search?q=tech+review+gadget+smartphone+laptop&hl=en-PK&gl=PK&ceid=PK:en',
+    'ai': 'https://news.google.com/rss/search?q=artificial+intelligence+cloud+computing+Pakistan&hl=en-PK&gl=PK&ceid=PK:en',
+    'cyber': 'https://news.google.com/rss/search?q=cybersecurity+hacking+security+Pakistan&hl=en-PK&gl=PK&ceid=PK:en',
+    'startups': 'https://news.google.com/rss/search?q=tech+startup+funding+entrepreneurship+Pakistan&hl=en-PK&gl=PK&ceid=PK:en',
+    'reviews': 'https://news.google.com/rss/search?q=tech+review+gadget+smartphone+laptop+Pakistan&hl=en-PK&gl=PK&ceid=PK:en',
 }
+
+
+def _normalize_image_url(img_url, page_url):
+    """Normalize an image URL relative to the page URL.
+    Handles protocol-relative (//), root-relative (/), and plain URLs.
+    Returns a fully-qualified absolute URL or None if invalid."""
+    if not img_url:
+        return None
+    img_url = img_url.strip()
+    if img_url.startswith('//'):
+        return 'https:' + img_url
+    if img_url.startswith('http://') or img_url.startswith('https://'):
+        return img_url
+    if img_url.startswith('/'):
+        parsed = urlparse(page_url)
+        return f"{parsed.scheme}://{parsed.netloc}{img_url}"
+    # Relative URL without leading slash
+    return urljoin(page_url, img_url)
+
+
+def _url_has_image_extension(url):
+    """Check if a URL (possibly with query params) ends with a known image extension."""
+    parsed = urlparse(url)
+    path_lower = parsed.path.lower()
+    return any(path_lower.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg', '.bmp', '.tiff'])
 
 
 def extract_image_from_entry(entry):
     """Extract image URL from an RSS feed entry"""
-    # 1. Check media_content
+    # 1. Check media_content (used by TechJuice)
     for media in entry.get('media_content', []):
         url = media.get('url', '')
-        if url and ('image' in media.get('type', '') or url.endswith(('.jpg', '.jpeg', '.png', '.webp'))):
-            return url
-
-    # 2. Check media_thumbnail
-    for thumb in entry.get('media_thumbnail', []):
-        url = thumb.get('url', '')
         if url:
             return url
 
-    # 3. Check enclosures
+    # 2. Check enclosures (used by ProPakistani)
     for enc in entry.get('enclosures', []):
         href = enc.get('href', '')
         if href and ('image' in enc.get('type', '') or href.endswith(('.jpg', '.jpeg', '.png', '.webp'))):
             return href
+        # Some feeds put URL in 'url' attribute instead of 'href'
+        url_attr = enc.get('url', '')
+        if url_attr and ('image' in enc.get('type', '') or url_attr.endswith(('.jpg', '.jpeg', '.png', '.webp'))):
+            return url_attr
+
+    # 3. Check media_thumbnail
+    for thumb in entry.get('media_thumbnail', []):
+        url = thumb.get('url', '')
+        if url:
+            return url
 
     # 4. Check content for embedded images
     for content in entry.get('content', []):
@@ -96,7 +120,8 @@ def extract_image_from_entry(entry):
 
 
 def extract_image_from_url(url):
-    """Fetch an article page and extract its main image"""
+    """Fetch an article page and extract its main image.
+    Normalizes all returned URLs to absolute form."""
     try:
         resp = requests.get(url, headers=HEADERS, timeout=10, allow_redirects=True)
         if resp.status_code != 200:
@@ -105,30 +130,34 @@ def extract_image_from_url(url):
         html = resp.text
 
         # Try og:image first (most reliable)
-        og_match = re.search(r'<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']', html, re.IGNORECASE)
+        og_match = re.search(r'<meta[^>]*content=["\']([^"\']+)["\'][^>]*property=["\']og:image["\']', html, re.IGNORECASE) or re.search(r'<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']', html, re.IGNORECASE)
         if og_match:
-            return og_match.group(1)
+            return _normalize_image_url(og_match.group(1), url)
 
         # Try twitter:image
         tw_match = re.search(r'<meta[^>]*name=["\']twitter:image["\'][^>]*content=["\']([^"\']+)["\']', html, re.IGNORECASE)
         if tw_match:
-            return tw_match.group(1)
+            return _normalize_image_url(tw_match.group(1), url)
 
         # Try twitter:image:src
         tw2_match = re.search(r'<meta[^>]*name=["\']twitter:image:src["\'][^>]*content=["\']([^"\']+)["\']', html, re.IGNORECASE)
         if tw2_match:
-            return tw2_match.group(1)
+            return _normalize_image_url(tw2_match.group(1), url)
+
+        # Try <link rel="image_src"> (used by some sites)
+        link_match = re.search(r'<link[^>]*rel=["\']image_src["\'][^>]*href=["\']([^"\']+)["\']', html, re.IGNORECASE) or re.search(r'<link[^>]*href=["\']([^"\']+)["\'][^>]*rel=["\']image_src["\']', html, re.IGNORECASE)
+        if link_match:
+            return _normalize_image_url(link_match.group(1), url)
+
+        # Try itemprop="image" meta tag
+        itemprop_match = re.search(r'<meta[^>]*itemprop=["\']image["\'][^>]*content=["\']([^"\']+)["\']', html, re.IGNORECASE) or re.search(r'<meta[^>]*content=["\']([^"\']+)["\'][^>]*itemprop=["\']image["\']', html, re.IGNORECASE)
+        if itemprop_match:
+            return _normalize_image_url(itemprop_match.group(1), url)
 
         # Try first article/hero image
-        img_match = re.search(r'<img[^>]*src=["\']([^"\']+\.(jpg|jpeg|png|webp))["\']', html, re.IGNORECASE)
+        img_match = re.search(r'<img[^>]*src=["\']([^"\']+\.(jpg|jpeg|png|webp|gif))["\']', html, re.IGNORECASE)
         if img_match:
-            img_url = img_match.group(1)
-            if img_url.startswith('//'):
-                img_url = 'https:' + img_url
-            elif img_url.startswith('/'):
-                parsed = urlparse(url)
-                img_url = f"{parsed.scheme}://{parsed.netloc}{img_url}"
-            return img_url
+            return _normalize_image_url(img_match.group(1), url)
 
         return None
     except Exception as e:
@@ -137,7 +166,11 @@ def extract_image_from_url(url):
 
 
 def download_image(url, filename):
-    """Download an image and save it locally"""
+    # Reject generic thumbnails
+    if _is_generic_thumbnail(url):
+        return None
+    """Download an image and save it locally.
+    Handles protocol-relative, root-relative, and query-parameter URLs."""
     try:
         if not url or not filename:
             return None
@@ -148,10 +181,13 @@ def download_image(url, filename):
 
         resp = requests.get(url, headers=HEADERS, timeout=15, stream=True)
         if resp.status_code != 200:
+            resp.close()
             return None
 
         content_type = resp.headers.get('content-type', '')
-        if 'image' not in content_type and not any(url.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.webp']):
+        # Use urlparse to check the path (ignoring query params) for extension fallback
+        if 'image' not in content_type and not _url_has_image_extension(url):
+            resp.close()
             return None
 
         images_dir = os.path.join(DATA_DIR, 'images')
@@ -161,9 +197,10 @@ def download_image(url, filename):
         with open(filepath, 'wb') as f:
             for chunk in resp.iter_content(8192):
                 f.write(chunk)
+        resp.close()
 
         size = os.path.getsize(filepath)
-        if size > 5000:  # At least 5KB to be a real image
+        if size > 15000:  # At least 5KB to be a real image
             return filepath
         else:
             os.remove(filepath)
@@ -220,7 +257,7 @@ def fetch_from_direct_rss(category='tech', max_results=5):
 
 
 def fetch_from_google_news(category='tech', max_results=5):
-    """Fallback: fetch from Google News RSS (titles/descriptions only, no images)"""
+    """Fallback: fetch from Google News RSS and try to extract images from articles"""
     url = GOOGLE_NEWS_RSS.get(category, GOOGLE_NEWS_RSS['tech'])
     feed = feedparser.parse(url)
     articles = []
@@ -235,6 +272,12 @@ def fetch_from_google_news(category='tech', max_results=5):
         if not title:
             continue
 
+        # Try to extract image from the article URL
+        image_url = None
+        if link:
+            image_url = extract_image_from_url(link)
+            time.sleep(0.3)
+
         article_hash = hashlib.md5(f"{title}{link}".encode()).hexdigest()
 
         article = {
@@ -244,9 +287,9 @@ def fetch_from_google_news(category='tech', max_results=5):
             'pub_date': pub_date,
             'source': source,
             'category': category,
-            'image_url': None,  # Google News RSS doesn't provide images
+            'image_url': image_url,
             'hash': article_hash,
-            'has_real_image': False,
+            'has_real_image': bool(image_url),
         }
         articles.append(article)
 
@@ -347,3 +390,50 @@ if __name__ == '__main__':
             print(f"    Image: {a['image_url'][:80]}")
         if a.get('local_image_path'):
             print(f"    Local: {a['local_image_path']}")
+
+
+def _is_generic_thumbnail(url):
+    """Reject generic/placeholder thumbnails from Google News and other aggregators."""
+    if not url:
+        return False
+    url_lower = url.lower()
+    # Google News generic thumbnails
+    generic_patterns = [
+        'lh3.googleusercontent.com',
+        'news.google.com/__i/rss',
+        'news.google.com/rss/thumbnails',
+        '=s0-w300',
+        '=s0-w200',
+        '=s0-w100',
+        'google.com/images/branding',
+        'gstatic.com/images',
+        'gnews.com/thumb',
+        'ssl.gstatic.com',
+    ]
+    for pattern in generic_patterns:
+        if pattern in url_lower:
+            return True
+    return False
+
+
+def _get_image_hashes():
+    """Load hashes of previously downloaded images for deduplication."""
+    import hashlib
+    hashes_file = os.path.join(DATA_DIR, 'seen_images.json')
+    if os.path.exists(hashes_file):
+        with open(hashes_file) as f:
+            return set(json.load(f))
+    return set()
+
+
+def _save_image_hash(img_hash):
+    """Save image hash for deduplication."""
+    import hashlib
+    hashes_file = os.path.join(DATA_DIR, 'seen_images.json')
+    existing = _get_image_hashes()
+    existing.add(img_hash)
+    # Keep last 2000 hashes
+    if len(existing) > 2000:
+        existing = set(list(existing)[-2000:])
+    with open(hashes_file, 'w') as f:
+        json.dump(list(existing), f)

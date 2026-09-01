@@ -6,6 +6,14 @@
 
 if (!defined('ABSPATH')) exit;
 
+/**
+ * Brevo Newsletter Configuration
+ */
+define("BREVO_API_KEY", "REDACTED_BREVO_KEY");
+define("BREVO_LIST_ID", 2);
+define("BREVO_SENDER_EMAIL", "REDACTED_EMAIL");
+define("BREVO_SENDER_NAME", "TechNama");
+
 define('TECHNAMA_VERSION', '1.0.0');
 
 /**
@@ -772,24 +780,78 @@ function technama_newsletter_subscribe() {
     }
     
     global $wpdb;
-    $table = $wpdb->prefix . 'newsletter_subscribers';
+    $table = 'tn_newsletter_subscribers';
     
     $existing = $wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE email = %s", $email));
     
     if ($existing) {
         $wpdb->update($table, array('status' => 'active'), array('email' => $email));
-        wp_send_json_success(array('message' => 'Thank you! If this email is not already registered, you will receive a confirmation shortly.'));
     } else {
         $wpdb->insert($table, array(
             'email' => $email,
             'status' => 'active',
-            'consent_date' => current_time('mysql'),
+            'consent' => 1,
         ));
-        wp_send_json_success(array('message' => 'Thank you! If this email is not already registered, you will receive a confirmation shortly.'));
     }
+    
+    // Non-blocking: trigger Brevo sync in shutdown (after response sent)
+    add_action('shutdown', function() use ($email) {
+        technama_sync_to_brevo($email);
+    });
+    
+    // Respond IMMEDIATELY - don't wait for Brevo
+    wp_send_json_success(array('message' => 'Thank you! You have been subscribed successfully.'));
 }
 add_action('wp_ajax_tn_subscribe', 'technama_newsletter_subscribe');
 add_action('wp_ajax_nopriv_tn_subscribe', 'technama_newsletter_subscribe');
+
+/**
+ * Sync subscriber to Brevo newsletter service
+ */
+function technama_sync_to_brevo($email, $first_name = '', $last_name = '') {
+    if (!defined('BREVO_API_KEY') || !BREVO_API_KEY) {
+        return false;
+    }
+    
+    $payload = array(
+        'email' => $email,
+        'listIds' => array(BREVO_LIST_ID),
+        'updateEnabled' => true,
+    );
+    
+    if ($first_name || $last_name) {
+        $payload['attributes'] = array();
+        if ($first_name) $payload['attributes']['FIRSTNAME'] = $first_name;
+        if ($last_name) $payload['attributes']['LASTNAME'] = $last_name;
+    }
+    
+    // Non-blocking: use curl directly with short timeout
+    $ch = curl_init('https://api.brevo.com/v3/contacts');
+    curl_setopt_array($ch, array(
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode($payload),
+        CURLOPT_HTTPHEADER => array(
+            'api-key: ' . BREVO_API_KEY,
+            'content-type: application/json',
+            'accept: application/json',
+        ),
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 5,
+        CURLOPT_CONNECTTIMEOUT => 3,
+        CURLOPT_SSL_VERIFYPEER => false,
+    ));
+    $result = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($http_code >= 200 && $http_code < 300) {
+        error_log('[Brevo] Contact synced: ' . $email);
+        return true;
+    }
+    
+    error_log('[Brevo] Sync failed for ' . $email . ': HTTP ' . $http_code);
+    return false;
+}
 
 /**
  * Get user bookmarks count
