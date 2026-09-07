@@ -40,9 +40,9 @@ export default function Navbar({ links = defaultLinks }: NavbarProps) {
           {/* Logo */}
           <a href="/#home" className="flex items-center flex-shrink-0">
             {theme === "dark" ? (
-              <img src="/cryptostack-logo-white.svg" alt="CryptoStack" className="h-8 w-auto" />
+              <img src="/cryptostack-white.png" alt="CryptoStack" className="h-8 w-auto" />
             ) : (
-              <img src="/cryptostack-logo-black.svg" alt="CryptoStack" className="h-8 w-auto" />
+              <img src="/cryptostack-black.png" alt="CryptoStack" className="h-8 w-auto" />
             )}
           </a>
 

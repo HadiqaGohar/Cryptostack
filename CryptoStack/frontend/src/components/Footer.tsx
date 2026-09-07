@@ -64,9 +64,9 @@ export default function Footer({
           {/* Logo + Tagline */}
           <div>
             {theme === "dark" ? (
-              <img src="/cryptostack-logo-white.svg" alt="CryptoStack" className="h-8 w-auto mb-3" />
+              <img src="/cryptostack-white.png" alt="CryptoStack" className="h-8 w-auto mb-3" />
             ) : (
-              <img src="/cryptostack-logo-black.svg" alt="CryptoStack" className="h-8 w-auto mb-3" />
+              <img src="/cryptostack-black.png" alt="CryptoStack" className="h-8 w-auto mb-3" />
             )}
             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               {tagline}
