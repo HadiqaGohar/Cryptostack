@@ -24,3 +24,6 @@ os.makedirs(LOGS_DIR, exist_ok=True)
 
 # Newsletter Toggle
 NEWSLETTER_ENABLED = os.getenv('NEWSLETTER_ENABLED', 'true').lower() == 'true'
+
+# Admin Email Toggle (empty = admin receives emails)
+ADMIN_EMAIL_EXCLUDE = os.getenv('ADMIN_EMAIL_EXCLUDE', '').lower().strip()

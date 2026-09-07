@@ -1145,6 +1145,26 @@ function technama_newsletter_admin_render() {
             <p class="description" style="margin-top:15px;">
                 Toggle this to start or stop sending newsletter emails to your subscribers.
             </p>
+            
+            <hr style="margin:30px 0;">
+            
+            <h2>👤 Your Email Settings</h2>
+            <?php $admin_excluded = get_option('tn_admin_email_excluded', 0); ?>
+            <div style="display:flex;align-items:center;gap:20px;margin:20px 0;">
+                <div style="font-size:18px;font-weight:bold;color:<?php echo $admin_excluded ? '#d63638' : '#00a32a'; ?>;">
+                    <?php echo $admin_excluded ? '❌ You are EXCLUDED' : '✅ You are RECEIVING emails'; ?>
+                </div>
+            </div>
+            <p style="color:#666;">
+                <?php echo get_option('admin_email'); ?> — 
+                <?php echo $admin_excluded ? 'You will NOT receive newsletter emails.' : 'You WILL receive newsletter emails with each article.'; ?>
+            </p>
+            <button id="tn-toggle-admin-email" class="button button-secondary button-hero" style="font-size:14px;padding:10px 25px;background:<?php echo $admin_excluded ? '#00a32a' : '#d63638'; ?>;color:#fff;border-color:<?php echo $admin_excluded ? '#00a32a' : '#d63638'; ?>;">
+                <?php echo $admin_excluded ? '▶️ START Receiving Emails' : '⏸️ STOP Receiving Emails'; ?>
+            </button>
+            <p class="description" style="margin-top:15px;">
+                Control whether YOU (admin) receive newsletter emails. Other subscribers are not affected.
+            </p>
         </div>
     </div>
     <script>
@@ -1153,6 +1173,24 @@ function technama_newsletter_admin_render() {
         btn.prop('disabled', true).text('Processing...');
         jQuery.post(ajaxurl, {
             action: 'tn_toggle_newsletter'
+        }, function(response) {
+            if (response.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + response.data);
+                btn.prop('disabled', false);
+            }
+        }).fail(function() {
+            alert('Network error. Please try again.');
+            btn.prop('disabled', false);
+        });
+    });
+    
+    jQuery('#tn-toggle-admin-email').on('click', function() {
+        var btn = jQuery(this);
+        btn.prop('disabled', true).text('Processing...');
+        jQuery.post(ajaxurl, {
+            action: 'tn_toggle_admin_email'
         }, function(response) {
             if (response.success) {
                 location.reload();
@@ -1752,3 +1790,59 @@ function technama_create_tables() {
     dbDelta($sql_episodes);
 }
 add_action('after_switch_theme', 'technama_create_tables');
+
+/**
+ * Newsletter toggle AJAX handler
+ */
+function technama_toggle_newsletter() {
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Unauthorized');
+    }
+    
+    $current = get_option('tn_newsletter_enabled', 1);
+    $new_value = $current ? 0 : 1;
+    update_option('tn_newsletter_enabled', $new_value);
+    
+    // Update config.env
+    $config_path = '/root/hadiqa/gohar/TechNama/pipeline/config.env';
+    if (file_exists($config_path)) {
+        $config = file_get_contents($config_path);
+        $config = preg_replace('/NEWSLETTER_ENABLED=.*/', 'NEWSLETTER_ENABLED=' . ($new_value ? 'true' : 'false'), $config);
+        file_put_contents($config_path, $config);
+    }
+    
+    wp_send_json_success(array(
+        'enabled' => (bool) $new_value,
+        'message' => $new_value ? 'Newsletter ENABLED' : 'Newsletter DISABLED'
+    ));
+}
+add_action('wp_ajax_tn_toggle_newsletter', 'technama_toggle_newsletter');
+
+/**
+ * Toggle admin email reception (AJAX handler)
+ */
+function technama_toggle_admin_email() {
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Unauthorized');
+    }
+    
+    $current = get_option('tn_admin_email_excluded', 0);
+    $new_value = $current ? 0 : 1;
+    update_option('tn_admin_email_excluded', $new_value);
+    
+    // Update config.env
+    $config_path = '/root/hadiqa/gohar/TechNama/pipeline/config.env';
+    if (file_exists($config_path)) {
+        $config = file_get_contents($config_path);
+        $admin_email = get_option('admin_email');
+        $exclude = $new_value ? $admin_email : '';
+        $config = preg_replace('/ADMIN_EMAIL_EXCLUDE=.*/', 'ADMIN_EMAIL_EXCLUDE=' . $exclude, $config);
+        file_put_contents($config_path, $config);
+    }
+    
+    wp_send_json_success(array(
+        'excluded' => (bool) $new_value,
+        'message' => $new_value ? 'Admin email STOPPED - you will not receive newsletters' : 'Admin email ENABLED - you will receive newsletters'
+    ));
+}
+add_action('wp_ajax_tn_toggle_admin_email', 'technama_toggle_admin_email');

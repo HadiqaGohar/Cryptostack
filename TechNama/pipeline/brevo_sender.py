@@ -7,7 +7,7 @@ import json
 import os
 import logging
 from datetime import datetime
-from config import BREVO_API_KEY, BREVO_LIST_ID, BREVO_SENDER_EMAIL, BREVO_SENDER_NAME, WP_URL, DATA_DIR
+from config import BREVO_API_KEY, BREVO_LIST_ID, BREVO_SENDER_EMAIL, BREVO_SENDER_NAME, WP_URL, DATA_DIR, ADMIN_EMAIL_EXCLUDE
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,9 @@ def get_subscribers():
             contacts = data.get("contacts", [])
             # Filter only active contacts
             active = [c for c in contacts if c.get("emailBlacklisted") is False]
+            # Exclude admin email if configured
+            if ADMIN_EMAIL_EXCLUDE:
+                active = [s for s in active if s.get("email", "").lower() != ADMIN_EMAIL_EXCLUDE]
             logger.info(f"[Brevo] Found {len(active)} active subscribers")
             return active
         else:
