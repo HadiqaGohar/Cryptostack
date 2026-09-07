@@ -9,13 +9,10 @@ interface NavbarProps {
 }
 
 const defaultLinks = [
-  { label: "Home", href: "/#home" },
-  { label: "How It Works", href: "/#how-to-start" },
-  { label: "🤖 AI Signals", href: "/signals" },
-  { label: "📊 Practice Trading", href: "/trade" },
-  { label: "📚 Learn Patterns", href: "/patterns" },
-  { label: "The Book", href: "/book" },
-  { label: "FAQ", href: "/#faq" },
+  { label: "Signals", href: "/signals" },
+  { label: "Trade", href: "/trade" },
+  { label: "Patterns", href: "/patterns" },
+  { label: "Learn", href: "/book" },
 ];
 
 export default function Navbar({ links = defaultLinks }: NavbarProps) {
@@ -33,7 +30,7 @@ export default function Navbar({ links = defaultLinks }: NavbarProps) {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-white/90 dark:bg-dark-900/90 backdrop-blur-md border-b border-gray-200 dark:border-dark-600 shadow-sm"
+          ? "bg-white/80 dark:bg-dark-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-dark-600/50"
           : "bg-transparent"
       }`}
       aria-label="Main navigation"
@@ -41,78 +38,84 @@ export default function Navbar({ links = defaultLinks }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <a href="/#home" className="flex items-center">
+          <a href="/#home" className="flex items-center flex-shrink-0">
             {theme === "dark" ? (
-              <img src="/cryptostack-logo-white.svg" alt="CryptoStack" className="h-9 w-auto" />
+              <img src="/cryptostack-logo-white.svg" alt="CryptoStack" className="h-8 w-auto" />
             ) : (
-              <img src="/cryptostack-logo-black.svg" alt="CryptoStack" className="h-9 w-auto" />
+              <img src="/cryptostack-logo-black.svg" alt="CryptoStack" className="h-8 w-auto" />
             )}
           </a>
 
-          {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-6">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-1">
             {links.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-colors duration-200 ${
-                  ["/signals", "/trade", "/patterns", "/book"].includes(link.href)
-                    ? "text-brand hover:text-brand-light"
-                    : "text-gray-600 dark:text-gray-300 hover:text-brand dark:hover:text-brand"
-                }`}
+                className="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-dark-700/50 transition-all duration-200"
               >
-                {link.href === "/signals" ? "🤖 " : link.href === "/trade" ? "📊 " : link.href === "/patterns" ? "📚 " : link.href === "/book" ? "📖 " : ""}{link.label}
+                {link.label}
               </a>
             ))}
+          </div>
+
+          {/* Right Side */}
+          <div className="hidden md:flex items-center gap-3">
             <ThemeToggle />
             <a
               href="/signals"
-              className="px-4 py-2 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand-dark transition-colors duration-200"
+              className="px-5 py-2 bg-brand text-white text-sm font-semibold rounded-lg hover:bg-brand-dark transition-all duration-200 shadow-sm shadow-brand/20 hover:shadow-brand/30"
             >
               Get Started
             </a>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile: Theme Toggle + Hamburger */}
           <div className="flex items-center gap-2 md:hidden">
             <ThemeToggle />
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700"
+              className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors"
               aria-label="Toggle menu"
               aria-expanded={menuOpen}
             >
-              <div className="w-5 h-4 flex flex-col justify-between">
-                <span className={`block h-0.5 bg-current transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-1.5" : ""}`} />
-                <span className={`block h-0.5 bg-current transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
-                <span className={`block h-0.5 bg-current transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-1.5" : ""}`} />
-              </div>
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                {menuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Menu */}
-        {menuOpen && (
-          <div className="md:hidden pb-4 border-t border-gray-200 dark:border-dark-600">
-            {links.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className="block py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand dark:hover:text-brand hover:bg-gray-50 dark:hover:bg-dark-700 rounded-lg"
-              >
-                {link.href === "/signals" ? "🤖 " : link.href === "/trade" ? "📊 " : link.href === "/patterns" ? "📚 " : link.href === "/book" ? "📖 " : ""}{link.label}
-              </a>
-            ))}
+      {/* Mobile Menu */}
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-300 ${
+          menuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="px-4 pb-4 space-y-1 bg-white/95 dark:bg-dark-900/95 backdrop-blur-xl border-b border-gray-200/50 dark:border-dark-600/50">
+          {links.map((link) => (
             <a
-              href="/signals"
+              key={link.href}
+              href={link.href}
               onClick={() => setMenuOpen(false)}
-              className="block mx-4 mt-2 px-4 py-2 bg-brand text-white text-sm font-medium rounded-lg text-center hover:bg-brand-dark"
+              className="block px-4 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-dark-700/50 rounded-lg transition-colors"
             >
-              Get Started
+              {link.label}
             </a>
-          </div>
-        )}
+          ))}
+          <a
+            href="/signals"
+            onClick={() => setMenuOpen(false)}
+            className="block px-4 py-2.5 mt-2 bg-brand text-white text-sm font-semibold rounded-lg text-center hover:bg-brand-dark transition-colors"
+          >
+            Get Started
+          </a>
+        </div>
       </div>
     </nav>
   );
