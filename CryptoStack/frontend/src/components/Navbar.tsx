@@ -10,7 +10,9 @@ interface NavbarProps {
 const defaultLinks = [
   { label: "Home", href: "/#home" },
   { label: "How It Works", href: "/#how-to-start" },
-  { label: "AI Signals", href: "/signals" },
+  { label: "🤖 AI Signals", href: "/signals" },
+  { label: "📊 Practice Trading", href: "/trade" },
+  { label: "📚 Learn Patterns", href: "/patterns" },
   { label: "FAQ", href: "/#faq" },
 ];
 
@@ -50,12 +52,12 @@ export default function Navbar({ links = defaultLinks }: NavbarProps) {
                 key={link.href}
                 href={link.href}
                 className={`text-sm font-medium transition-colors duration-200 ${
-                  link.href === "/signals"
+                  ["/signals", "/trade", "/patterns"].includes(link.href)
                     ? "text-brand hover:text-brand-light"
                     : "text-gray-600 dark:text-gray-300 hover:text-brand dark:hover:text-brand"
                 }`}
               >
-                {link.href === "/signals" ? "🤖 " : ""}{link.label}
+                {link.href === "/signals" ? "🤖 " : link.href === "/trade" ? "📊 " : link.href === "/patterns" ? "📚 " : ""}{link.label}
               </a>
             ))}
             <ThemeToggle />
@@ -95,7 +97,7 @@ export default function Navbar({ links = defaultLinks }: NavbarProps) {
                 onClick={() => setMenuOpen(false)}
                 className="block py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand dark:hover:text-brand hover:bg-gray-50 dark:hover:bg-dark-700 rounded-lg"
               >
-                {link.href === "/signals" ? "🤖 " : ""}{link.label}
+                {link.href === "/signals" ? "🤖 " : link.href === "/trade" ? "📊 " : link.href === "/patterns" ? "📚 " : ""}{link.label}
               </a>
             ))}
             <a
