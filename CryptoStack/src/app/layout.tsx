@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -15,33 +15,38 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "CryptoStack - Future of Crypto Trading",
   description:
-    "Join the future of crypto trading. Deposit once, trade freely with zero loss risk. Compete with real traders, climb the ranks, and earn daily rewards.",
+    "Join the future of crypto trading with risk-free trading pools. Compete, earn rewards, and grow your portfolio.",
   keywords: [
-    "crypto trading",
-    "pool trading",
+    "crypto",
+    "trading",
     "cryptocurrency",
+    "bitcoin",
+    "pool trading",
+    "crypto rewards",
     "trading platform",
-    "risk-free trading",
   ],
   openGraph: {
     title: "CryptoStack - Future of Crypto Trading",
     description:
-      "Deposit once, trade freely with zero loss risk. Compete with real traders & climb the ranks for daily rewards.",
+      "Join the future of crypto trading with risk-free trading pools. Compete, earn rewards, and grow your portfolio.",
     type: "website",
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body className="min-h-screen bg-[#0a0a0a] text-[#ededed]">
+      <body className="antialiased bg-dark-900 text-white min-h-screen">
         {children}
       </body>
     </html>
