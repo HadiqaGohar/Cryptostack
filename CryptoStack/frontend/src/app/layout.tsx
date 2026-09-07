@@ -22,6 +22,9 @@ export const metadata: Metadata = {
     description: "Free AI-powered crypto signals. We help you avoid losses.",
     type: "website",
   },
+  icons: {
+    icon: "/cryptostack-logo-white.svg",
+  },
 };
 
 export const viewport = {

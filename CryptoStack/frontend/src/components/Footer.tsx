@@ -1,3 +1,7 @@
+"use client";
+
+import { useTheme } from "@/context/ThemeContext";
+
 interface FooterLink {
   label: string;
   href: string;
@@ -48,20 +52,22 @@ const defaultColumns: FooterColumn[] = [
 ];
 
 export default function Footer({
-  logo = "🔥 CryptoStack",
   tagline = "AI signals that keep you safe. For real trading, use any live platform.",
   columns = defaultColumns,
   copyright = "© 2025 CryptoStack. All Rights Reserved.",
 }: FooterProps) {
+  const { theme } = useTheme();
   return (
     <footer className="bg-gray-50 dark:bg-dark-800/50 border-t border-gray-200 dark:border-dark-600">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Logo + Tagline */}
           <div>
-            <p className="text-xl font-bold bg-gradient-to-r from-brand to-brand-light bg-clip-text text-transparent mb-3">
-              {logo}
-            </p>
+            {theme === "dark" ? (
+              <img src="/cryptostack-logo-white.svg" alt="CryptoStack" className="h-8 w-auto mb-3" />
+            ) : (
+              <img src="/cryptostack-logo-black.svg" alt="CryptoStack" className="h-8 w-auto mb-3" />
+            )}
             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               {tagline}
             </p>

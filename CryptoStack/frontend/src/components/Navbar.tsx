@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import ThemeToggle from "./ThemeToggle";
+import { useTheme } from "@/context/ThemeContext";
 
 interface NavbarProps {
   links?: { label: string; href: string }[];
@@ -20,6 +21,7 @@ const defaultLinks = [
 export default function Navbar({ links = defaultLinks }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -39,11 +41,12 @@ export default function Navbar({ links = defaultLinks }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <a href="/#home" className="flex items-center gap-2">
-            <span className="text-2xl">🔥</span>
-            <span className="text-xl font-bold bg-gradient-to-r from-brand to-brand-light bg-clip-text text-transparent">
-              CryptoStack
-            </span>
+          <a href="/#home" className="flex items-center">
+            {theme === "dark" ? (
+              <img src="/cryptostack-logo-white.svg" alt="CryptoStack" className="h-9 w-auto" />
+            ) : (
+              <img src="/cryptostack-logo-black.svg" alt="CryptoStack" className="h-9 w-auto" />
+            )}
           </a>
 
           {/* Desktop Links */}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40" fill="none">
+  <!-- Fire icon -->
+  <path d="M20 4C20 4 24 10 24 16C24 18.2 22.2 20 20 20C17.8 20 16 18.2 16 16C16 12 18 8 20 4Z" fill="#36bb91"/>
+  <path d="M20 8C20 8 22 12 22 15C22 16.1 21.1 17 20 17C18.9 17 18 16.1 18 15C18 12 20 8 20 8Z" fill="#2a9a76"/>
+  
+  <!-- Text: CryptoStack -->
+  <text x="34" y="28" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="bold" fill="#1a1a1a">Crypto</text>
+  <text x="108" y="28" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="bold" fill="#36bb91">Stack</text>
+</svg>
