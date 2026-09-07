@@ -31,6 +31,7 @@ const defaultColumns: FooterColumn[] = [
       { label: "AI Signals", href: "/signals" },
       { label: "Practice Trading", href: "/trade" },
       { label: "Learn Patterns", href: "/patterns" },
+      { label: "The Book", href: "/book" },
       { label: "How It Works", href: "/#how-to-start" },
       { label: "FAQ", href: "/#faq" },
     ],

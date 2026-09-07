@@ -15,15 +15,24 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Check localStorage first, then system preference
+    const saved = localStorage.getItem("cryptostack-theme") as Theme | null;
+    if (saved) {
+      setTheme(saved);
+    } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
+      setTheme("light");
+    }
     setMounted(true);
-    const saved = localStorage.getItem("cryptostack-theme") as Theme;
-    if (saved) setTheme(saved);
   }, []);
 
   useEffect(() => {
     if (!mounted) return;
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    document.documentElement.classList.toggle("light", theme === "light");
+    
+    // Apply theme class to html element
+    document.documentElement.classList.remove("dark", "light");
+    document.documentElement.classList.add(theme);
+    
+    // Save preference
     localStorage.setItem("cryptostack-theme", theme);
   }, [theme, mounted]);
 
