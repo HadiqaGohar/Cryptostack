@@ -154,7 +154,7 @@ export default function BookClient() {
     <div className="min-h-screen bg-gray-50 dark:bg-dark-900">
       <Navbar />
 
-      <div className="bg-brand/10 border-b border-brand/20 pt-16">
+      <div className="bg-brand/10 border-b border-brand/20">
         <div className="max-w-7xl mx-auto px-4 py-2 text-center">
           <p className="text-sm text-brand font-medium">
             📚 The Book — Free trading education. Learn from zero, trade smarter.

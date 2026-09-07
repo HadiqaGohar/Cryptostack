@@ -41,7 +41,9 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark`} suppressHydrationWarning>
       <body className="antialiased min-h-screen transition-colors duration-300">
         <ThemeProvider>
-          {children}
+          <main className="pt-16">
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>
