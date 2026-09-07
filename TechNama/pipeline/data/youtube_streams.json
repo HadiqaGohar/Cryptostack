@@ -1,17 +1,6 @@
 {
-  "discovered_at": "2026-09-01T06:00:04.883990",
+  "discovered_at": "2026-09-06T06:00:10.298838",
   "streams": [
-    {
-      "video_id": "QB5BNdBFujE",
-      "title": "Bloomberg Business News Live",
-      "description": "Programming schedule (EST): 12:00 AM - 5:00 AM: Bloomberg Global Business News 5:00 AM - 6:00 AM Bloomberg Brief 6:00 ...",
-      "channel": "Bloomberg Television",
-      "channel_id": "UCIALMKvObZNtJ6AmdCLP7Lg",
-      "published_at": "2026-06-14T10:31:53Z",
-      "thumbnail": "https://i.ytimg.com/vi/QB5BNdBFujE/hqdefault_live.jpg",
-      "url": "https://www.youtube.com/watch?v=QB5BNdBFujE",
-      "embed_url": "https://www.youtube.com/embed/QB5BNdBFujE"
-    },
     {
       "video_id": "ThPmgOTmtzg",
       "title": "92 NEWS LIVE | Pakistan News Live - Latest Headlines &amp; Breaking News - Press Conferences &amp; Speeches",
@@ -24,37 +13,48 @@
       "embed_url": "https://www.youtube.com/embed/ThPmgOTmtzg"
     },
     {
-      "video_id": "Iy-n1SVJnXA",
-      "title": "PM Modi Live : SCO \u0938\u092e\u093f\u091f \u092e\u0947\u0902 \u092c\u094b\u0932 \u0930\u0939\u0947 PM Modi | Kyrgyzstan | Bishkek | Pakistan | China | Russia",
-      "description": "PM Modi Live : SCO \u0938\u092e\u093f\u091f \u092e\u0947\u0902 \u092c\u094b\u0932 \u0930\u0939\u0947 PM Modi | Kyrgyzstan | Bishkek | Pakistan | China | Russia #pmmodi ...",
-      "channel": "News18 India",
-      "channel_id": "UCPP3etACgdUWvizcES1dJ8Q",
-      "published_at": "2026-09-01T04:26:55Z",
-      "thumbnail": "https://i.ytimg.com/vi/Iy-n1SVJnXA/hqdefault_live.jpg",
-      "url": "https://www.youtube.com/watch?v=Iy-n1SVJnXA",
-      "embed_url": "https://www.youtube.com/embed/Iy-n1SVJnXA"
+      "video_id": "-ZUBVlf9PVk",
+      "title": "WATCH LIVE | India Vs Pakistan Women\u2019s Asia Cup 2026: Live Streaming, Head-To-Head, Pitch",
+      "description": "India Women take on arch-rivals Pakistan Women in a much-anticipated Group A clash at the Women's Asia Cup 2026 in Dubai ...",
+      "channel": "The Daily Guardian",
+      "channel_id": "UCG7JI87raV6HrgJheRi0MVg",
+      "published_at": "2026-09-05T09:37:01Z",
+      "thumbnail": "https://i.ytimg.com/vi/-ZUBVlf9PVk/hqdefault_live.jpg",
+      "url": "https://www.youtube.com/watch?v=-ZUBVlf9PVk",
+      "embed_url": "https://www.youtube.com/embed/-ZUBVlf9PVk"
     },
     {
-      "video_id": "sYZtOFzM78M",
-      "title": "India Today TV LIVE: PM Modi On GDP | Messi Retires | Modi-Putin Meeting| Nepal Floods | Iran-US War",
-      "description": "India Today TV LIVE: PM Modi On GDP | Messi Retires | Modi-Putin Meeting| Nepal Floods | Iran-US War Prime Minister Narendra ...",
-      "channel": "India Today",
-      "channel_id": "UCYPvAwZP8pZhSMW8qs7cVCw",
-      "published_at": "2022-11-28T07:37:07Z",
-      "thumbnail": "https://i.ytimg.com/vi/sYZtOFzM78M/hqdefault_live.jpg",
-      "url": "https://www.youtube.com/watch?v=sYZtOFzM78M",
-      "embed_url": "https://www.youtube.com/embed/sYZtOFzM78M"
+      "video_id": "QB5BNdBFujE",
+      "title": "Bloomberg Business News Live",
+      "description": "Programming schedule (EST): 12:00 AM - 5:00 AM: Bloomberg Global Business News 5:00 AM - 6:00 AM Bloomberg Brief 6:00 ...",
+      "channel": "Bloomberg Television",
+      "channel_id": "UCIALMKvObZNtJ6AmdCLP7Lg",
+      "published_at": "2026-06-14T10:31:53Z",
+      "thumbnail": "https://i.ytimg.com/vi/QB5BNdBFujE/hqdefault_live.jpg",
+      "url": "https://www.youtube.com/watch?v=QB5BNdBFujE",
+      "embed_url": "https://www.youtube.com/embed/QB5BNdBFujE"
     },
     {
       "video_id": "1_Ih0JYmkjI",
       "title": "CNBC TV18 24x7 LIVE: Stock Market LIVE Updates | Nifty &amp; Sensex Live | Share Market | Business News",
-      "description": "CNBC TV18 24x7 LIVE: Stock Market LIVE | Share Markets Updates | Nifty & Sensex | Business News LIVE | Reserve Bank | Gift ...",
+      "description": "CNBC TV18 24x7 LIVE: Stock Market LIVE | Share Markets Updates | Nifty & Sensex | Business News LIVE | Gift Nifty LIVE The ...",
       "channel": "CNBC-TV18",
       "channel_id": "UCmRbHAgG2k2vDUvb3xsEunQ",
       "published_at": "2023-06-21T10:09:53Z",
       "thumbnail": "https://i.ytimg.com/vi/1_Ih0JYmkjI/hqdefault_live.jpg",
       "url": "https://www.youtube.com/watch?v=1_Ih0JYmkjI",
       "embed_url": "https://www.youtube.com/embed/1_Ih0JYmkjI"
+    },
+    {
+      "video_id": "sYZtOFzM78M",
+      "title": "India Today TV LIVE: PM Modi SRCC Speech | Swatantra Bhardwaj Arrested | Nepal Flood | USI-ran War",
+      "description": "India Today TV LIVE: PM Modi SRCC Speech | Swatantra Bhardwaj Arrested | Nepal Flood | USI-ran War Swatantra Bhardwaj, ...",
+      "channel": "India Today",
+      "channel_id": "UCYPvAwZP8pZhSMW8qs7cVCw",
+      "published_at": "2022-11-28T07:37:07Z",
+      "thumbnail": "https://i.ytimg.com/vi/sYZtOFzM78M/hqdefault_live.jpg",
+      "url": "https://www.youtube.com/watch?v=sYZtOFzM78M",
+      "embed_url": "https://www.youtube.com/embed/sYZtOFzM78M"
     },
     {
       "video_id": "MLDQM0QL_-4",
@@ -68,15 +68,15 @@
       "embed_url": "https://www.youtube.com/embed/MLDQM0QL_-4"
     },
     {
-      "video_id": "oJIJXE4CdcE",
-      "title": "\ud83d\udd34 Live Metal Charts: Gold, Silver, Copper, Zinc, Aluminium, Palladium",
-      "description": "What you see is an Educational Metals Chart with Signals, which is easy to read and understand Charts are set to M5 Timeframe, ...",
-      "channel": "Forex Education Live",
-      "channel_id": "UCsasPMe7Jaa8RM4B_j8Qhxg",
-      "published_at": "2025-12-07T21:11:03Z",
-      "thumbnail": "https://i.ytimg.com/vi/oJIJXE4CdcE/hqdefault_live.jpg",
-      "url": "https://www.youtube.com/watch?v=oJIJXE4CdcE",
-      "embed_url": "https://www.youtube.com/embed/oJIJXE4CdcE"
+      "video_id": "DTOO1xCpmFk",
+      "title": "\ud83d\udd34 LIVE | September 27 Mega Plan | How Will Pakistan Be Shut Down? | PTI Talks &amp; Government Challenge",
+      "description": "27 September ki badi political planning? \u067e\u0648\u0631\u0627 \u0645\u0644\u06a9 \u06a9\u06cc\u0633\u06d2 \u0628\u0646\u062f \u06c1\u0648\u06af\u0627\u061f PTI aur government ke darmiyan negotiations, siyasi halat aur ...",
+      "channel": "Ahil News",
+      "channel_id": "UCtUm4UpabyvU-GuD9qHOU6g",
+      "published_at": "2026-09-05T20:42:43Z",
+      "thumbnail": "https://i.ytimg.com/vi/DTOO1xCpmFk/hqdefault_live.jpg",
+      "url": "https://www.youtube.com/watch?v=DTOO1xCpmFk",
+      "embed_url": "https://www.youtube.com/embed/DTOO1xCpmFk"
     },
     {
       "video_id": "5FW9ZVMR_7M",
@@ -101,15 +101,15 @@
       "embed_url": "https://www.youtube.com/embed/3VstsarTbn0"
     },
     {
-      "video_id": "8daCCzbCWnk",
-      "title": "LIVE: Putin, Xi and World Leaders Gather in Kyrgyzstan for 26th SCO Summit | AQ1B",
-      "description": "World leaders, including Russian President Vladimir Putin, Chinese President Xi Jinping and the heads of India, Iran and Pakistan ...",
-      "channel": "DRM News",
-      "channel_id": "UCrvG04V6wbOau6fVJI01OlQ",
-      "published_at": "2026-09-01T05:13:17Z",
-      "thumbnail": "https://i.ytimg.com/vi/8daCCzbCWnk/hqdefault_live.jpg",
-      "url": "https://www.youtube.com/watch?v=8daCCzbCWnk",
-      "embed_url": "https://www.youtube.com/embed/8daCCzbCWnk"
+      "video_id": "SNaMbjCZKlY",
+      "title": "QUOTEX LIVE TRADING \u279c AI TRADING BOT | BINARY OPTIONS TRADING | BINARY TRADING BOT",
+      "description": "MATRIX BOT \u279c https://t.me/MatrixTool_Bot TEXT ME +BOT \u279c https://t.me/miapocket Text me if you need help \u2713 PUBLIC ...",
+      "channel": "MATRIX BOT",
+      "channel_id": "UCGbNAWErVeFerD6fpF40Ocw",
+      "published_at": "2026-05-23T10:16:44Z",
+      "thumbnail": "https://i.ytimg.com/vi/SNaMbjCZKlY/hqdefault_live.jpg",
+      "url": "https://www.youtube.com/watch?v=SNaMbjCZKlY",
+      "embed_url": "https://www.youtube.com/embed/SNaMbjCZKlY"
     },
     {
       "video_id": "LYoC3Imaa98",
@@ -145,49 +145,49 @@
       "embed_url": "https://www.youtube.com/embed/-ps7V40GrA4"
     },
     {
-      "video_id": "qpwLPz94paQ",
-      "title": "LEAP 2026 Technology Conference Kicks Off in Riyadh",
-      "description": "leap2026 #riyadh #technology #techconference #saudiarabia #innovation #technologynews #futuretech #breakingnews ...",
-      "channel": "ARY News",
-      "published_at": "2026-09-01T05:35:49Z",
-      "thumbnail": "https://i.ytimg.com/vi/qpwLPz94paQ/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=qpwLPz94paQ"
+      "video_id": "MoJ4MSgdDUc",
+      "title": "Maryam Nawaz Announces Major Security Upgrade in Punjab! AI &amp; Drones Deployed#MaryamNawaz #Punjab",
+      "description": "Maryam Nawaz Announces Major Security Upgrade in Punjab! AI & Drones Deployed#Maryam Nawaz #Punjab English Title: ...",
+      "channel": "PMLN lovers",
+      "published_at": "2026-09-06T05:39:57Z",
+      "thumbnail": "https://i.ytimg.com/vi/MoJ4MSgdDUc/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=MoJ4MSgdDUc"
     },
     {
-      "video_id": "ZSXpS8agJ-I",
-      "title": "Pakistan \u092e\u0947\u0902 AI \u0915\u093e\u0930 \u0939\u0941\u0908 \u092b\u0947\u0932?\u092a\u0941\u0932\u093f\u0938 \u0915\u0940 \u0917\u093e\u0921\u093c\u0940 \u0938\u0947 \u0939\u0941\u0908 \u091f\u0915\u094d\u0915\u0930| Latest Updates",
-      "description": "Pakistan \u092e\u0947\u0902 AI \u0915\u093e\u0930 \u0939\u0941\u0908 \u092b\u0947\u0932?\u092a\u0941\u0932\u093f\u0938 \u0915\u0940 \u0917\u093e\u0921\u093c\u0940 \u0938\u0947 \u0939\u0941\u0908 \u091f\u0915\u094d\u0915\u0930 #Pakistan #DriverlessCar ...",
-      "channel": "News India 24x7",
-      "published_at": "2026-09-01T04:42:24Z",
-      "thumbnail": "https://i.ytimg.com/vi/ZSXpS8agJ-I/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=ZSXpS8agJ-I"
-    },
-    {
-      "video_id": "pow4E-VO7I8",
-      "title": "Breaking: Is Chaudhry Nasar Ali Khan Joining PTI? Latest Claims &amp; Analysis | Imran Riaz Khan",
-      "description": "Breaking Pakistan News! This video examines recent claims and political discussion about whether Chaudhry Nasar Ali Khan ...",
+      "video_id": "SNWViSRamDs",
+      "title": "Good News? Big Sunday Decision Sparks Nationwide Attention | Imran Khan Update | Imran Riaz Khan",
+      "description": "BREAKING NEWS: Welcome to today's Pakistan Breaking News. In this video, we cover the latest publicly available ...",
       "channel": "IRK Media 24",
-      "published_at": "2026-09-01T03:35:06Z",
-      "thumbnail": "https://i.ytimg.com/vi/pow4E-VO7I8/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=pow4E-VO7I8"
+      "published_at": "2026-09-06T04:27:50Z",
+      "thumbnail": "https://i.ytimg.com/vi/SNWViSRamDs/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=SNWViSRamDs"
     },
     {
-      "video_id": "-TGPE2A-7Dw",
-      "title": "Pakistan-India Army Tensions Rise Again | Imran Khan Update | Mohsin Naqvi Leaves for Iran |Javed Ch",
-      "description": "Pakistan India army tensions are rising again as fresh developments fuel concerns over another conflict. This video covers the ...",
+      "video_id": "bqnNLXAJxqY",
+      "title": "How Did Dr Samina Haq\u2019s Father Defend Pakistan in 1965 ? #DeepMatters #DrSaminaHaq #DefenceDay",
+      "description": "How Did Dr Samina Haq's Father Defend Pakistan in 1965 ? #DeepMatters #DrSaminaHaq #PakistanHistory #DefenceDay ...",
+      "channel": "Deep Matters",
+      "published_at": "2026-09-06T04:00:03Z",
+      "thumbnail": "https://i.ytimg.com/vi/bqnNLXAJxqY/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=bqnNLXAJxqY"
+    },
+    {
+      "video_id": "sWRCKAo3WQA",
+      "title": "India-Belgium Defence Deal: 10 Agreements That Could Change the Game",
+      "description": "India Belgium defence deal | India Belgium defence cooperation | Belgium Pakistan defence ties | India defence news | 10 ...",
+      "channel": "BHARAT WORLD VIEW",
+      "published_at": "2026-09-06T03:59:42Z",
+      "thumbnail": "https://i.ytimg.com/vi/sWRCKAo3WQA/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=sWRCKAo3WQA"
+    },
+    {
+      "video_id": "uQNgIFem2Xo",
+      "title": "India\u2019s Big Shock to Pakistan? Major Twist Exposed |Imran Khan Release Update |Trump-Iran-Israel War",
+      "description": "India Pakistan tensions take a dramatic turn as new developments raise major questions about regional security and diplomacy.",
       "channel": "Khabar Verse",
-      "published_at": "2026-09-01T02:22:46Z",
-      "thumbnail": "https://i.ytimg.com/vi/-TGPE2A-7Dw/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=-TGPE2A-7Dw"
-    },
-    {
-      "video_id": "Aof8KQugI8E",
-      "title": "\u092a\u093e\u0915\u093f\u0938\u094d\u0924\u093e\u0928 \u092e\u0947\u0902 Unknown Gunman \u0915\u093e \u0915\u0939\u0930! | \u0920\u094b\u0915\u093e \u0917\u092f\u093e \u0939\u093e\u092b\u093f\u091c | India Pakistan News",
-      "description": "Hi I m Dear Guru WhatsApp https://whatsapp.com/channel/0029VbByZqHEQIamo4fLnK26 Telegram https://t.me/DearGuru1 ...",
-      "channel": "Dear Guru",
-      "published_at": "2026-09-01T01:40:01Z",
-      "thumbnail": "https://i.ytimg.com/vi/Aof8KQugI8E/hqdefault.jpg",
-      "url": "https://www.youtube.com/watch?v=Aof8KQugI8E"
+      "published_at": "2026-09-06T02:08:46Z",
+      "thumbnail": "https://i.ytimg.com/vi/uQNgIFem2Xo/hqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=uQNgIFem2Xo"
     }
   ]
 }

@@ -1,9 +1,121 @@
 [
   {
-    "timestamp": "2026-09-01T06:52:08.345436",
-    "post_id": 999,
-    "title": "Test Newsletter - TechNama Automation",
-    "sent": 3,
+    "timestamp": "2026-09-06T18:31:08.290624",
+    "post_id": 3666,
+    "title": "Pakistan and Google Partner to Boost Digital Skills and IT Exports",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-06T22:01:14.490853",
+    "post_id": 3667,
+    "title": "Pakistan Accelerates Digital Economy with New Cloud Enablement and Startup Fund",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-06T22:01:14.638892",
+    "post_id": 3668,
+    "title": "Pakistan Accelerates Digital Economy with New Cloud Enablement and Startup Fund",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-06T22:31:12.181280",
+    "post_id": 3672,
+    "title": "Pakistan Startup Ecosystem Surges: Over $74 Million Raised in 2025",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-06T23:01:16.371901",
+    "post_id": 3673,
+    "title": "AI and Cloud Skills Gap: New Training Tour Targets 10 Regions to Boost Digital Workforce",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-07T00:31:09.263460",
+    "post_id": 3675,
+    "title": "Pakistan Unveils First Locally Hosted AI Cloud to Secure National Data Sovereignty",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-07T00:31:09.769557",
+    "post_id": 3676,
+    "title": "Pakistan Launches First Locally Hosted AI Cloud to Secure National Data Sovereignty",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-07T02:31:13.705050",
+    "post_id": 3678,
+    "title": "TECNO Spark 50 and Samsung Galaxy Book6 Lead Global Tech Launches on March 27, 2026",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-07T02:31:13.931256",
+    "post_id": 3677,
+    "title": "TECNO Spark 50 and Samsung Galaxy Book6 Lead Global Tech Launches on March 27, 2026",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-07T04:31:13.080749",
+    "post_id": 3684,
+    "title": "Pakistan Launches Third Bid for September LNG Cargo Amid Global Price Spike",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-07T04:31:23.505825",
+    "post_id": 3687,
+    "title": "Pakistan Launches Third Bid for September LNG Cargo Amid Global Price Spike",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-07T04:31:25.818555",
+    "post_id": 3688,
+    "title": "AI and Cloud Skills Gap: New Training Tour Targets 10 Regions to Boost Digital Workforce",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-07T05:01:25.311464",
+    "post_id": 3694,
+    "title": "FWO Targets $432M Recovery from 437km White Oil Pipeline in Four Years",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-07T05:01:26.481455",
+    "post_id": 3695,
+    "title": "Ahsan Urges Expansion of Makkah Pact into Trade, Tech, and Education Sectors",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-07T05:31:10.507583",
+    "post_id": 3704,
+    "title": "Precious Metals See Early Decline Amid US-Iran Tensions and Oil Price Volatility",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-07T05:31:10.790285",
+    "post_id": 3706,
+    "title": "Gold and Silver Prices Fall at Market Open Amid US-Iran Tensions",
+    "sent": 1,
+    "failed": 0
+  },
+  {
+    "timestamp": "2026-09-07T05:31:12.879938",
+    "post_id": 3710,
+    "title": "Rainmaker Technology Claims Drone Cloud Seeding Produced 19 Million Gallons of Rain in Alaska",
+    "sent": 1,
     "failed": 0
   }
 ]

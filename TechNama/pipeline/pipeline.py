@@ -12,6 +12,7 @@ from topic_guardrails import is_topic_allowed
 from groq_rewriter import rewrite_article
 from wordpress_poster import post_via_mysql, get_or_create_category, upload_featured_image, get_featured_image_for_category
 from brevo_sender import send_newsletter
+from config import WP_URL
 import json
 import logging
 
