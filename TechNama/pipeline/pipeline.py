@@ -12,6 +12,7 @@ from topic_guardrails import is_topic_allowed
 from groq_rewriter import rewrite_article
 from wordpress_poster import post_via_mysql, get_or_create_category, upload_featured_image, get_featured_image_for_category
 from brevo_sender import send_newsletter
+from config import NEWSLETTER_ENABLED
 from config import WP_URL
 import json
 import logging
@@ -134,21 +135,24 @@ def run_pipeline():
                 posted += 1
                 logger.info(f"  -> PUBLISHED (ID: {result['id']})")
                 
-                # Send newsletter to subscribers
-                try:
-                    newsletter_sent = send_newsletter(
-                        post_id=result['id'],
-                        title=rewritten['headline'],
-                        excerpt=article['description'],
-                        category=category_slug,
-                        image_url=article.get('image_url', ''),
-                        article_url=f"{WP_URL}/?p={result['id']}"
-                    )
-                    if newsletter_sent:
-                        newsletters_sent += 1
-                        logger.info(f"  -> NEWSLETTER SENT to subscribers")
-                except Exception as e:
-                    logger.warning(f"  -> Newsletter send failed: {e}")
+                # Send newsletter (only if enabled)
+                if NEWSLETTER_ENABLED:
+                    try:
+                        newsletter_sent = send_newsletter(
+                            post_id=result['id'],
+                            title=rewritten['headline'],
+                            excerpt=article['description'],
+                            category=category_slug,
+                            image_url=article.get('image_url', ''),
+                            article_url=f"{WP_URL}/?p={result['id']}"
+                        )
+                        if newsletter_sent:
+                            newsletters_sent += 1
+                            logger.info(f"  -> NEWSLETTER SENT to subscribers")
+                    except Exception as e:
+                        logger.warning(f"  -> Newsletter send failed: {e}")
+                else:
+                    logger.info(f"  -> Newsletter DISABLED - skipping email for: {rewritten.get('headline', 'Unknown')}")
         else:
             failed += 1
             logger.error(f"  -> FAILED: {result['status']}")

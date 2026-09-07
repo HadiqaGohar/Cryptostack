@@ -317,10 +317,24 @@ function technama_customize_register($wp_customize) {
         'default'           => true,
         'sanitize_callback' => 'technama_sanitize_checkbox',
     ));
+
+    // Newsletter Sending Toggle
+    $wp_customize->add_setting('technama_newsletter_sending', array(
+        'default'           => true,
+        'sanitize_callback' => 'technama_sanitize_checkbox',
+    ));
     $wp_customize->add_control('technama_show_newsletter', array(
         'label'   => __('Show Newsletter Widget in Sidebar', 'technama'),
         'section' => 'technama_newsletter',
         'type'    => 'checkbox',
+    ));
+
+    // Newsletter Sending Toggle Control
+    $wp_customize->add_control('technama_newsletter_sending', array(
+        'label'       => __('Newsletter Sending (ON/OFF)', 'technama'),
+        'description' => __('Toggle to enable/disable email delivery to subscribers.', 'technama'),
+        'section'     => 'technama_newsletter',
+        'type'        => 'checkbox',
     ));
 
     // Newsletter Title

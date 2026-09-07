@@ -21,3 +21,6 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 LOGS_DIR = os.path.join(os.path.dirname(__file__), 'logs')
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(LOGS_DIR, exist_ok=True)
+
+# Newsletter Toggle
+NEWSLETTER_ENABLED = os.getenv('NEWSLETTER_ENABLED', 'true').lower() == 'true'

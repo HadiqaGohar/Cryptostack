@@ -1101,6 +1101,73 @@ function technama_admin_security_headers() {
     header('X-XSS-Protection: 1; mode=block');
     header('Referrer-Policy: strict-origin-when-cross-origin');
 }
+
+
+/**
+ * Newsletter Control Admin Page
+ */
+function technama_newsletter_admin_page() {
+    add_menu_page(
+        '📧 Newsletter Control',
+        'Newsletter',
+        'manage_options',
+        'tn-newsletter-control',
+        'technama_newsletter_admin_render',
+        'dashicons-email-alt',
+        30
+    );
+}
+add_action('admin_menu', 'technama_newsletter_admin_page');
+
+function technama_newsletter_admin_render() {
+    $enabled = get_option('tn_newsletter_enabled', 1);
+    ?>
+    <div class="wrap">
+        <h1>📧 Newsletter Control</h1>
+        <div style="background:#fff;padding:30px;border:1px solid #ccc;border-radius:8px;max-width:600px;margin-top:20px;">
+            <h2 style="margin-top:0;">Email Sending Status</h2>
+            <div style="display:flex;align-items:center;gap:20px;margin:20px 0;">
+                <div id="toggle-status" style="font-size:24px;font-weight:bold;color:<?php echo $enabled ? '#00a32a' : '#d63638'; ?>;">
+                    <?php echo $enabled ? '✅ ENABLED' : '❌ DISABLED'; ?>
+                </div>
+            </div>
+            <p style="color:#666;">
+                <?php if ($enabled): ?>
+                    Currently sending emails to all subscribers with each new article.
+                <?php else: ?>
+                    Newsletter sending is paused. No emails are being sent.
+                <?php endif; ?>
+            </p>
+            <hr>
+            <button id="tn-toggle-newsletter" class="button button-primary button-hero" style="font-size:16px;padding:12px 30px;background:<?php echo $enabled ? '#d63638' : '#00a32a'; ?>;border-color:<?php echo $enabled ? '#d63638' : '#00a32a'; ?>;">
+                <?php echo $enabled ? '⏸️ STOP Sending Emails' : '▶️ START Sending Emails'; ?>
+            </button>
+            <p class="description" style="margin-top:15px;">
+                Toggle this to start or stop sending newsletter emails to your subscribers.
+            </p>
+        </div>
+    </div>
+    <script>
+    jQuery('#tn-toggle-newsletter').on('click', function() {
+        var btn = jQuery(this);
+        btn.prop('disabled', true).text('Processing...');
+        jQuery.post(ajaxurl, {
+            action: 'tn_toggle_newsletter'
+        }, function(response) {
+            if (response.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + response.data);
+                btn.prop('disabled', false);
+            }
+        }).fail(function() {
+            alert('Network error. Please try again.');
+            btn.prop('disabled', false);
+        });
+    });
+    </script>
+    <?php
+}
 add_action('admin_init', 'technama_admin_security_headers');
 
 /**
