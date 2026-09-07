@@ -34,6 +34,7 @@ const defaultColumns: FooterColumn[] = [
       { label: "Pools", href: "#features" },
       { label: "Rewards", href: "#payouts" },
       { label: "API", href: "#api" },
+      { label: "AI Signals", href: "/signals" },
     ],
   },
   {

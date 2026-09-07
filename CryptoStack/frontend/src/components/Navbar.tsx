@@ -17,6 +17,7 @@ const defaultLinks: NavbarLink[] = [
   { label: "How It Works", href: "#how-to-start" },
   { label: "Payouts", href: "#payouts" },
   { label: "FAQ", href: "#faq" },
+  { label: "🤖 Signals", href: "/signals" },
 ];
 
 export default function Navbar({ links = defaultLinks }: NavbarProps) {
@@ -52,15 +53,22 @@ export default function Navbar({ links = defaultLinks }: NavbarProps) {
           </a>
 
           <div className="hidden md:flex items-center gap-8">
-            {links.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-sm text-gray-400 transition-colors hover:text-white"
-              >
-                {link.label}
-              </a>
-            ))}
+            {links.map((link) => {
+              const isSignals = link.href === "/signals";
+              return (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className={`text-sm transition-colors ${
+                    isSignals
+                      ? "text-emerald-400 hover:text-emerald-300 font-semibold"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  {link.label}
+                </a>
+              );
+            })}
             <a
               href="#get-started"
               className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-dark-900 transition-all hover:bg-brand-light hover:shadow-lg hover:shadow-brand/20"
@@ -100,16 +108,23 @@ export default function Navbar({ links = defaultLinks }: NavbarProps) {
         }`}
       >
         <div className="bg-dark-800 border-t border-white/5 px-4 py-4 space-y-3">
-          {links.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              className="block rounded-lg px-4 py-2.5 text-sm text-gray-400 transition-colors hover:bg-dark-700 hover:text-white"
-            >
-              {link.label}
-            </a>
-          ))}
+          {links.map((link) => {
+            const isSignals = link.href === "/signals";
+            return (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className={`block rounded-lg px-4 py-2.5 text-sm transition-colors ${
+                  isSignals
+                    ? "text-emerald-400 font-semibold hover:bg-dark-700 hover:text-emerald-300"
+                    : "text-gray-400 hover:bg-dark-700 hover:text-white"
+                }`}
+              >
+                {link.label}
+              </a>
+            );
+          })}
           <a
             href="#get-started"
             onClick={() => setMenuOpen(false)}
