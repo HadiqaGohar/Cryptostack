@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Initialize counters when stats section enters viewport
-  const statsSection = document.querySelector('.stats');
+  const statsSection = document.querySelector('.stats-bar');
   let countersAnimated = false;
 
   if (statsSection) {
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
       entries.forEach((entry) => {
         if (entry.isIntersecting && !countersAnimated) {
           countersAnimated = true;
-          const counters = document.querySelectorAll('.stat-number[data-target]');
+          const counters = document.querySelectorAll('.stats-bar__number[data-target]');
           counters.forEach((counter) => animateCounter(counter));
         }
       });
@@ -77,9 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const faqItems = document.querySelectorAll('.faq-item');
 
   faqItems.forEach((item) => {
-    const question = item.querySelector('.faq-question');
-    const answer = item.querySelector('.faq-answer');
-    const chevron = item.querySelector('.faq-chevron');
+    const question = item.querySelector('.faq-item__question');
+    const answer = item.querySelector('.faq-item__answer');
+    const chevron = item.querySelector('.faq-item__chevron');
 
     if (!question || !answer) return;
 
@@ -90,8 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
       faqItems.forEach((otherItem) => {
         if (otherItem !== item && otherItem.classList.contains('active')) {
           otherItem.classList.remove('active');
-          const otherAnswer = otherItem.querySelector('.faq-answer');
-          const otherChevron = otherItem.querySelector('.faq-chevron');
+          const otherAnswer = otherItem.querySelector('.faq-item__answer');
+          const otherChevron = otherItem.querySelector('.faq-item__chevron');
           if (otherAnswer) otherAnswer.style.maxHeight = '0';
           if (otherChevron) otherChevron.style.transform = 'rotate(0deg)';
         }
@@ -166,9 +166,9 @@ document.addEventListener('DOMContentLoaded', () => {
      5. MOBILE NAVIGATION
      ------------------------------------------ */
 
-  const hamburger = document.querySelector('.hamburger');
-  const mobileNav = document.querySelector('.mobile-nav');
-  const mobileNavLinks = document.querySelectorAll('.mobile-nav a');
+  const hamburger = document.querySelector('.navbar__hamburger');
+  const mobileNav = document.querySelector('.navbar__mobile-menu');
+  const mobileNavLinks = document.querySelectorAll('.navbar__mobile-menu a');
   const body = document.body;
 
   if (hamburger && mobileNav) {
@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
      ------------------------------------------ */
 
   const heroSection = document.querySelector('.hero');
-  const heroBackground = document.querySelector('.hero-bg');
+  const heroBackground = document.querySelector('.hero__bg');
 
   if (heroSection && heroBackground) {
     window.addEventListener('scroll', () => {
