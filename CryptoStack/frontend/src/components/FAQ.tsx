@@ -2,56 +2,46 @@
 
 import { useState } from "react";
 
-export interface FAQItem {
+interface FAQItem {
   question: string;
   answer: string;
 }
 
-export interface FAQProps {
+interface FAQProps {
   headline?: string;
   items?: FAQItem[];
-  ctaText?: string;
-  ctaHref?: string;
 }
 
 const defaultItems: FAQItem[] = [
   {
-    question: "What is cryptocurrency?",
-    answer:
-      "Cryptocurrency is a digital or virtual currency that uses cryptography for security. It operates on decentralized networks based on blockchain technology, enabling secure and transparent transactions without the need for intermediaries.",
+    question: "What is CryptoStack?",
+    answer: "CryptoStack is a free AI-powered crypto signal platform. We analyze the market and give you trading signals — so you don't lose money. For real trading, use any live exchange.",
   },
   {
-    question: "Is cryptocurrency safe?",
-    answer:
-      "Cryptocurrencies use blockchain technology which is highly secure and immutable. While no investment is completely risk-free, using reputable platforms like CryptoStack with built-in security measures significantly reduces risks.",
+    question: "Is this real trading?",
+    answer: "No. CryptoStack is for learning and signals only. We never touch your money. For actual trading, use platforms like Binance, Coinbase, or any exchange you trust.",
   },
   {
-    question: "Can I use crypto for everyday purchases?",
-    answer:
-      "Yes, many merchants accept cryptocurrency for everyday purchases. The number of businesses accepting crypto continues to grow, making it increasingly practical for daily use.",
+    question: "How do AI signals work?",
+    answer: "Our AI analyzes price trends using technical indicators (EMA, RSI). It tells you when to BUY (LONG), SELL (SHORT), or WAIT. Signals are free — no subscription needed.",
   },
   {
-    question: "What is cryptocurrency trading?",
-    answer:
-      "Cryptocurrency trading involves buying and selling digital assets on exchanges or platforms. At CryptoStack, we offer pool trading and challenge-based trading to make the experience more engaging and less risky.",
+    question: "Can I lose money here?",
+    answer: "No. CryptoStack is completely free and does not handle any money. We only provide signals. If you trade on other platforms, always manage your risk carefully.",
   },
   {
-    question: "What are the risks involved?",
-    answer:
-      "Market volatility, regulatory changes, and security concerns are the main risks. However, CryptoStack's pool trading model is designed to minimize individual risk by distributing it across participants.",
+    question: "What are Trading Pools?",
+    answer: "Trading Pools let you join a group of traders. Together, you share strategies and returns. It's safer than trading alone — but remember, all trading has risk.",
   },
   {
-    question: "Do I need technical knowledge?",
-    answer:
-      "No, modern platforms make it easy for beginners. CryptoStack provides intuitive tools, educational resources, and a supportive community to help you get started regardless of your technical background.",
+    question: "How do I start?",
+    answer: "Simply visit our AI Signals page, pick a coin, and follow the signals. No account needed, no fees, no risk. Just free AI-powered guidance.",
   },
 ];
 
 export default function FAQ({
-  headline = "Frequently Asked Questions",
+  headline = "Common Questions",
   items = defaultItems,
-  ctaText = "Contact us →",
-  ctaHref = "#contact",
 }: FAQProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
@@ -60,55 +50,50 @@ export default function FAQ({
   };
 
   return (
-    <section id="faq" className="relative py-24 lg:py-32">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center space-y-6 mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
+    <section id="faq" className="py-20 bg-gray-50 dark:bg-dark-800/30">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             {headline}
           </h2>
         </div>
 
-        <div className="space-y-4">
+        {/* Accordion */}
+        <div className="space-y-3">
           {items.map((item, i) => (
             <div
               key={i}
-              className="rounded-xl border border-white/5 bg-dark-800/50 overflow-hidden transition-all duration-300 hover:border-white/10"
+              className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-xl overflow-hidden"
             >
               <button
                 onClick={() => toggle(i)}
-                className="flex w-full items-center justify-between px-6 py-5 text-left"
+                className="w-full flex items-center justify-between p-5 text-left"
                 aria-expanded={activeIndex === i}
                 aria-controls={`faq-answer-${i}`}
               >
-                <span className="text-lg font-semibold pr-4">
+                <span className="font-semibold text-gray-900 dark:text-white pr-4">
                   {item.question}
                 </span>
                 <svg
-                  className={`h-5 w-5 shrink-0 text-gray-400 transition-transform duration-300 ${
+                  className={`w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0 transition-transform duration-300 ${
                     activeIndex === i ? "rotate-180" : ""
                   }`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
-                  strokeWidth={2}
-                  aria-hidden="true"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19 9l-7 7-7-7"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-
               <div
                 id={`faq-answer-${i}`}
                 role="region"
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  activeIndex === i ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
+                className={`overflow-hidden transition-all duration-300 ${
+                  activeIndex === i ? "max-h-96 pb-5" : "max-h-0"
                 }`}
               >
-                <p className="px-6 pb-5 text-gray-400 leading-relaxed">
+                <p className="px-5 text-gray-600 dark:text-gray-400 leading-relaxed">
                   {item.answer}
                 </p>
               </div>
@@ -116,12 +101,13 @@ export default function FAQ({
           ))}
         </div>
 
-        <div className="mt-12 text-center">
+        {/* CTA */}
+        <div className="text-center mt-10">
           <a
-            href={ctaHref}
-            className="inline-flex items-center gap-2 rounded-xl border border-brand/30 bg-brand/5 px-8 py-4 text-lg font-semibold text-brand transition-all duration-300 hover:bg-brand/10 hover:border-brand/50"
+            href="mailto:support@cryptostack.com"
+            className="inline-flex items-center gap-2 text-brand hover:text-brand-dark font-semibold transition-colors"
           >
-            {ctaText}
+            Still have questions? Contact us →
           </a>
         </div>
       </div>

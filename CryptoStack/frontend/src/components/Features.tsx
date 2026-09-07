@@ -1,12 +1,12 @@
 "use client";
 
-export interface Feature {
+interface Feature {
   icon: string;
   title: string;
   description: string;
 }
 
-export interface FeaturesProps {
+interface FeaturesProps {
   badge?: string;
   headline?: string;
   subtext?: string;
@@ -18,75 +18,68 @@ export interface FeaturesProps {
 const defaultFeatures: Feature[] = [
   {
     icon: "🤝",
-    title: "Collaborative Trading",
-    description: "Pool resources for bigger market impact and maximize your trading potential with fellow traders.",
+    title: "Trade Together",
+    description: "Join a pool of traders. Share strategies, share profits. Safer than trading alone.",
   },
   {
     icon: "🛡️",
-    title: "Minimum Risk Trading",
-    description: "Designed to keep your money safe with built-in risk management and loss protection mechanisms.",
+    title: "Low Risk, Smart Trading",
+    description: "Our AI watches the market for you. We alert you before losses happen.",
   },
   {
     icon: "🔍",
-    title: "Secure & Transparent",
-    description: "Real-time pool performance tracking with full transparency and verifiable on-chain data.",
+    title: "Transparent & Honest",
+    description: "See exactly how your pool is performing. No hidden fees, no surprises.",
   },
 ];
 
 export default function Features({
-  badge = "✨ NEW FEATURE",
-  headline = "Pool Trading is HERE!",
-  subtext = "Experience the future of collaborative trading. Pool your resources with other traders for maximum impact and minimum risk.",
+  badge = "✨ Why CryptoStack?",
+  headline = "Join a Trading Pool — Earn Together",
+  subtext = "Trading alone is risky. Join a pool, share knowledge, and grow together with AI guidance.",
   features = defaultFeatures,
-  ctaText = "Explore Pool Trading →",
-  ctaHref = "#get-started",
+  ctaText = "Explore Pools →",
+  ctaHref = "/signals",
 }: FeaturesProps) {
   return (
-    <section id="features" className="relative py-24 lg:py-32">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center space-y-6 mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/5 px-4 py-2">
-            <span className="text-sm font-medium text-brand">{badge}</span>
-          </div>
-
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
-            <span className="bg-gradient-to-r from-brand to-brand-light bg-clip-text text-transparent">
-              {headline}
-            </span>
+    <section id="features" className="py-20 bg-gray-50 dark:bg-dark-800/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-brand/10 text-brand text-sm font-semibold mb-4">
+            {badge}
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            {headline}
           </h2>
-
-          <p className="mx-auto max-w-2xl text-lg text-gray-400">
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             {subtext}
           </p>
         </div>
 
+        {/* Feature Cards */}
         <div className="grid md:grid-cols-3 gap-8">
           {features.map((feature, i) => (
             <div
               key={i}
-              className="group relative rounded-2xl border border-white/5 bg-dark-800/50 p-8 transition-all duration-300 hover:border-brand/20 hover:bg-dark-700/50 hover:shadow-xl hover:shadow-brand/5"
+              className="group relative bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-2xl p-8 hover:border-brand/50 dark:hover:border-brand/50 transition-all duration-300 hover:shadow-xl hover:shadow-brand/5"
             >
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-brand/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-              <div className="relative space-y-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-brand/10 text-2xl transition-transform duration-300 group-hover:scale-110">
-                  {feature.icon}
-                </div>
-
-                <h3 className="text-xl font-bold">{feature.title}</h3>
-
-                <p className="text-gray-400 leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
+              <div className="text-4xl mb-4">{feature.icon}</div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                {feature.title}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                {feature.description}
+              </p>
             </div>
           ))}
         </div>
 
-        <div className="mt-12 text-center">
+        {/* CTA */}
+        <div className="text-center mt-12">
           <a
             href={ctaHref}
-            className="inline-flex items-center gap-2 rounded-xl border border-brand/30 bg-brand/5 px-8 py-4 text-lg font-semibold text-brand transition-all duration-300 hover:bg-brand/10 hover:border-brand/50 hover:shadow-lg hover:shadow-brand/10"
+            className="inline-flex items-center gap-2 px-8 py-3.5 border-2 border-brand text-brand font-semibold rounded-xl hover:bg-brand hover:text-white transition-all duration-200"
           >
             {ctaText}
           </a>

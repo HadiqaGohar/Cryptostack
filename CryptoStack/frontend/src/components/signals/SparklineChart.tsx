@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 
-export interface SparklineChartProps {
+interface SparklineChartProps {
   data: number[];
   color?: string;
   width?: number;
@@ -16,38 +16,36 @@ export default function SparklineChart({
   height = 40,
 }: SparklineChartProps) {
   const points = useMemo(() => {
-    const safeData = data.length > 0 ? data : [50];
-    const len = safeData.length;
-    const minVal = Math.min(...safeData);
-    const maxVal = Math.max(...safeData);
-    const range = maxVal - minVal || 1;
-    const padY = 4;
-    const padX = 2;
-    const innerW = width - padX * 2;
-    const innerH = height - padY * 2;
+    if (!data || data.length < 2) return "";
 
-    return safeData
-      .map((v, i) => {
-        const x = padX + (i / (len - 1)) * innerW;
-        const y = padY + innerH - ((v - minVal) / range) * innerH;
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    const range = max - min || 1;
+
+    return data
+      .map((value, i) => {
+        const x = (i / (data.length - 1)) * width;
+        const y = height - ((value - min) / range) * (height - 4) - 2;
         return `${x},${y}`;
       })
       .join(" ");
   }, [data, width, height]);
 
+  if (!points) {
+    return (
+      <svg width={width} height={height}>
+        <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke={color} strokeWidth="1" opacity="0.3" />
+      </svg>
+    );
+  }
+
   return (
-    <svg
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
-      aria-label="Sparkline chart"
-      className="inline-block"
-    >
+    <svg width={width} height={height} className="w-full h-full">
       <polyline
         points={points}
         fill="none"
         stroke={color}
-        strokeWidth="1.5"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

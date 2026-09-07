@@ -1,10 +1,10 @@
-export interface Payout {
+interface Payout {
   icon: string;
   title: string;
   description: string;
 }
 
-export interface PayoutsProps {
+interface PayoutsProps {
   headline?: string;
   subtext?: string;
   payouts?: Payout[];
@@ -13,53 +13,51 @@ export interface PayoutsProps {
 const defaultPayouts: Payout[] = [
   {
     icon: "⚡",
-    title: "Instantly",
-    description: "Quick access to your funds with instant crypto withdrawals. No waiting periods.",
+    title: "Instant Signals",
+    description: "Get signals in real-time. No delays, no waiting.",
   },
   {
     icon: "🔒",
-    title: "Secure & Insured",
-    description: "Assets protected at every step with enterprise-grade security and insurance coverage.",
+    title: "Your Data, Safe",
+    description: "We never ask for personal info. Your privacy matters.",
   },
   {
     icon: "🚀",
     title: "No Limits",
-    description: "Trade without constraints. Withdraw your earnings anytime with no hidden fees.",
+    description: "Use our signals on any platform. No restrictions.",
   },
 ];
 
 export default function Payouts({
-  headline = "Receive your payments in crypto",
-  subtext = "Fast, secure, and limitless crypto payouts directly to your wallet.",
+  headline = "Why Trust CryptoStack?",
+  subtext = "We focus on keeping you safe. No hidden agenda, no tricks.",
   payouts = defaultPayouts,
 }: PayoutsProps) {
   return (
-    <section id="payouts" className="relative py-24 lg:py-32">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center space-y-6 mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
-            <span className="bg-gradient-to-r from-brand to-brand-light bg-clip-text text-transparent">
-              {headline}
-            </span>
+    <section className="py-20 bg-gray-50 dark:bg-dark-800/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            {headline}
           </h2>
-          <p className="mx-auto max-w-2xl text-lg text-gray-400">
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             {subtext}
           </p>
         </div>
 
+        {/* Payout Cards */}
         <div className="grid md:grid-cols-3 gap-8">
           {payouts.map((payout, i) => (
             <div
               key={i}
-              className="group relative rounded-2xl border border-white/5 bg-dark-800/50 p-8 transition-all duration-300 hover:border-brand/20 hover:bg-dark-700/50 hover:shadow-xl hover:shadow-brand/5 text-center"
+              className="text-center bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-2xl p-8 hover:border-brand/50 dark:hover:border-brand/50 transition-all duration-300"
             >
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-brand/10 text-3xl mb-6 transition-transform duration-300 group-hover:scale-110">
-                {payout.icon}
-              </div>
-
-              <h3 className="text-xl font-bold mb-3">{payout.title}</h3>
-
-              <p className="text-gray-400 leading-relaxed">
+              <div className="text-4xl mb-4">{payout.icon}</div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                {payout.title}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                 {payout.description}
               </p>
             </div>

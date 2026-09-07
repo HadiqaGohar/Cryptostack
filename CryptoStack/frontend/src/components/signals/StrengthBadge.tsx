@@ -1,19 +1,23 @@
-export interface StrengthBadgeProps {
+interface StrengthBadgeProps {
   strength: "Strong" | "Medium" | "Weak";
 }
 
-const config: Record<string, { icon: string; color: string }> = {
-  Strong: { icon: "🔥", color: "text-emerald-400" },
-  Medium: { icon: "⚡", color: "text-amber-400" },
-  Weak: { icon: "💤", color: "text-red-400" },
-};
-
 export default function StrengthBadge({ strength }: StrengthBadgeProps) {
-  const { icon, color } = config[strength] ?? config.Weak;
+  const styles = {
+    Strong: "text-emerald-600 dark:text-emerald-400",
+    Medium: "text-amber-600 dark:text-amber-400",
+    Weak: "text-red-600 dark:text-red-400",
+  };
+
+  const icons = {
+    Strong: "🔥",
+    Medium: "⚡",
+    Weak: "💤",
+  };
 
   return (
-    <span className={`inline-flex items-center gap-1 text-xs font-semibold ${color}`}>
-      <span>{icon}</span>
+    <span className={`inline-flex items-center gap-1 text-xs font-semibold ${styles[strength]}`}>
+      <span>{icons[strength]}</span>
       <span>{strength}</span>
     </span>
   );

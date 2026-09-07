@@ -1,10 +1,10 @@
-export interface Step {
+interface Step {
   number: number;
   title: string;
   description: string;
 }
 
-export interface HowToStartProps {
+interface HowToStartProps {
   headline?: string;
   subtext?: string;
   steps?: Step[];
@@ -13,61 +13,64 @@ export interface HowToStartProps {
 const defaultSteps: Step[] = [
   {
     number: 1,
-    title: "Create Account",
-    description: "Sign up and verify your identity in minutes with our streamlined onboarding process.",
+    title: "Sign Up (Free)",
+    description: "No account needed. Just visit our AI Signals page and start.",
   },
   {
     number: 2,
-    title: "Choose Challenge",
-    description: "Select from various trading challenges that match your skill level and goals.",
+    title: "Pick a Coin",
+    description: "Choose from 10 popular coins: Bitcoin, Ethereum, Solana, and more.",
   },
   {
     number: 3,
-    title: "Start Trading",
-    description: "Execute trades with our advanced tools and real-time market data.",
+    title: "Follow AI Signals",
+    description: "Our AI tells you: BUY, SELL, or WAIT. Simple as that.",
   },
   {
     number: 4,
-    title: "Earn Rewards",
-    description: "Win prizes and grow your portfolio by ranking high on the leaderboard.",
+    title: "Make Smart Decisions",
+    description: "Use our signals to trade wisely on any platform. Stay safe, stay profitable.",
   },
 ];
 
 export default function HowToStart({
-  headline = "How to get started",
-  subtext = "Enhance your crypto skills and grow your portfolio in four simple steps.",
+  headline = "How It Works — 4 Simple Steps",
+  subtext = "No complicated setup. No fees. Just free AI guidance.",
   steps = defaultSteps,
 }: HowToStartProps) {
   return (
-    <section id="how-to-start" className="relative py-24 lg:py-32 bg-dark-800/30">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center space-y-6 mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
+    <section id="how-to-start" className="py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             {headline}
           </h2>
-          <p className="mx-auto max-w-2xl text-lg text-gray-400">
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             {subtext}
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {steps.map((step) => (
-            <div key={step.number} className="relative group">
-              <div className="relative rounded-2xl border border-white/5 bg-dark-800/50 p-8 transition-all duration-300 hover:border-brand/20 hover:bg-dark-700/50 h-full">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand text-dark-900 text-lg font-bold mb-6 transition-transform duration-300 group-hover:scale-110">
-                  {step.number}
-                </div>
-
-                <h3 className="text-xl font-bold mb-3">{step.title}</h3>
-
-                <p className="text-gray-400 leading-relaxed">
-                  {step.description}
-                </p>
+        {/* Steps */}
+        <div className="grid md:grid-cols-4 gap-8">
+          {steps.map((step, i) => (
+            <div key={i} className="relative text-center">
+              {/* Number Circle */}
+              <div className="w-14 h-14 rounded-full bg-brand/10 border-2 border-brand flex items-center justify-center mx-auto mb-4">
+                <span className="text-xl font-bold text-brand">{step.number}</span>
               </div>
 
-              {step.number < steps.length && (
-                <div className="hidden lg:block absolute top-1/2 -right-4 w-8 border-t border-dashed border-white/10" />
+              {/* Dashed Line (desktop only) */}
+              {i < steps.length - 1 && (
+                <div className="hidden md:block absolute top-7 left-[60%] w-[80%] border-t-2 border-dashed border-gray-300 dark:border-dark-500" />
               )}
+
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                {step.title}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                {step.description}
+              </p>
             </div>
           ))}
         </div>

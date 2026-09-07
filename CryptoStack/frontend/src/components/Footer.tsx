@@ -1,83 +1,82 @@
-export interface FooterLink {
+interface FooterLink {
   label: string;
   href: string;
 }
 
-export interface FooterColumn {
+interface FooterColumn {
   title: string;
   links: FooterLink[];
 }
 
-export interface FooterProps {
+interface FooterProps {
   logo?: string;
   tagline?: string;
   columns?: FooterColumn[];
   copyright?: string;
 }
 
-const defaultLogo = "🔥 CryptoStack";
-
 const defaultColumns: FooterColumn[] = [
   {
     title: "Company",
     links: [
-      { label: "Home", href: "#home" },
-      { label: "About", href: "#about" },
-      { label: "Careers", href: "#careers" },
-      { label: "Blog", href: "#blog" },
+      { label: "Home", href: "/#" },
+      { label: "About Us", href: "/#home" },
+      { label: "AI Signals", href: "/signals" },
+      { label: "Contact", href: "mailto:support@cryptostack.com" },
     ],
   },
   {
     title: "Features",
     links: [
-      { label: "Trading", href: "#trading" },
-      { label: "Pools", href: "#features" },
-      { label: "Rewards", href: "#payouts" },
-      { label: "API", href: "#api" },
       { label: "AI Signals", href: "/signals" },
+      { label: "Trading Pools", href: "/#features" },
+      { label: "How It Works", href: "/#how-to-start" },
+      { label: "FAQ", href: "/#faq" },
     ],
   },
   {
     title: "Follow Us",
     links: [
-      { label: "Twitter", href: "#twitter" },
-      { label: "Discord", href: "#discord" },
-      { label: "Telegram", href: "#telegram" },
-      { label: "GitHub", href: "#github" },
+      { label: "Twitter", href: "#" },
+      { label: "Discord", href: "#" },
+      { label: "Telegram", href: "#" },
+      { label: "GitHub", href: "#" },
     ],
   },
 ];
 
 export default function Footer({
-  logo = defaultLogo,
-  tagline = "The future of crypto trading",
+  logo = "🔥 CryptoStack",
+  tagline = "AI signals that keep you safe. For real trading, use any live platform.",
   columns = defaultColumns,
-  copyright = "© 2024 CryptoStack. All Rights Reserved.",
+  copyright = "© 2025 CryptoStack. All Rights Reserved.",
 }: FooterProps) {
   return (
-    <footer className="border-t border-white/5 bg-dark-800/30">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
-          <div className="col-span-2 md:col-span-1 space-y-4">
-            <a href="#home" className="flex items-center gap-2 text-xl font-bold">
-              <span className="bg-gradient-to-r from-brand to-brand-light bg-clip-text text-transparent">
-                {logo}
-              </span>
-            </a>
-            <p className="text-sm text-gray-500 max-w-xs">
+    <footer className="bg-gray-50 dark:bg-dark-800/50 border-t border-gray-200 dark:border-dark-600">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid md:grid-cols-4 gap-8">
+          {/* Logo + Tagline */}
+          <div>
+            <p className="text-xl font-bold bg-gradient-to-r from-brand to-brand-light bg-clip-text text-transparent mb-3">
+              {logo}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               {tagline}
             </p>
           </div>
 
-          {columns.map((column) => (
-            <div key={column.title} className="space-y-4">
-              <h3 className="font-semibold text-white">{column.title}</h3>
-              <ul className="space-y-3">
-                {column.links.map((link) => (
-                  <li key={link.label}>
+          {/* Link Columns */}
+          {columns.map((column, i) => (
+            <div key={i}>
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-4">
+                {column.title}
+              </h4>
+              <ul className="space-y-2">
+                {column.links.map((link, j) => (
+                  <li key={j}>
                     <a
                       href={link.href}
-                      className="text-sm text-gray-500 transition-colors hover:text-white"
+                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-brand dark:hover:text-brand transition-colors"
                     >
                       {link.label}
                     </a>
@@ -87,11 +86,12 @@ export default function Footer({
             </div>
           ))}
         </div>
-      </div>
 
-      <div className="border-t border-white/5">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-          <p className="text-center text-sm text-gray-600">{copyright}</p>
+        {/* Copyright */}
+        <div className="mt-10 pt-6 border-t border-gray-200 dark:border-dark-600 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-500">
+            {copyright}
+          </p>
         </div>
       </div>
     </footer>

@@ -1,5 +1,6 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "@/context/ThemeContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,41 +14,32 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CryptoStack - Future of Crypto Trading",
-  description:
-    "Join the future of crypto trading with risk-free trading pools. Compete, earn rewards, and grow your portfolio.",
-  keywords: [
-    "crypto",
-    "trading",
-    "cryptocurrency",
-    "bitcoin",
-    "pool trading",
-    "crypto rewards",
-    "trading platform",
-  ],
+  title: "CryptoStack - AI Crypto Signals & Pool Trading",
+  description: "Free AI-powered crypto signals. We help you avoid losses and make smart decisions. For real trading, use any live platform.",
+  keywords: ["crypto", "trading", "signals", "AI", "bitcoin", "pool trading", "cryptocurrency"],
   openGraph: {
-    title: "CryptoStack - Future of Crypto Trading",
-    description:
-      "Join the future of crypto trading with risk-free trading pools. Compete, earn rewards, and grow your portfolio.",
+    title: "CryptoStack - AI Crypto Signals & Pool Trading",
+    description: "Free AI-powered crypto signals. We help you avoid losses.",
     type: "website",
   },
 };
 
-export const viewport: Viewport = {
+export const viewport = {
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({
   children,
-}: LayoutProps<"/">) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable}`}
-    >
-      <body className="antialiased bg-dark-900 text-white min-h-screen">
-        {children}
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark`} suppressHydrationWarning>
+      <body className="antialiased min-h-screen bg-dark-900 text-white transition-colors duration-300">
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
