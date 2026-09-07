@@ -60,7 +60,7 @@ export default function Footer({
         <div className="grid md:grid-cols-4 gap-8">
           {/* Logo + Tagline */}
           <div>
-            <img src="/cryptostack-logo.webp" alt="CryptoStack" className="h-12 w-auto mb-3" />
+            <img src="/cryptostack-logo.png" alt="CryptoStack" className="h-12 w-auto mb-3" />
             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               {tagline}
             </p>

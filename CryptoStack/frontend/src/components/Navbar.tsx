@@ -36,7 +36,7 @@ export default function Navbar({ links = defaultLinks }: NavbarProps) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <a href="/#home" className="flex items-center flex-shrink-0">
-            <img src="/cryptostack-logo.webp" alt="CryptoStack" className="h-10 w-auto" />
+            <img src="/cryptostack-logo.png" alt="CryptoStack" className="h-10 w-auto" />
           </a>
 
           {/* Desktop Navigation */}
