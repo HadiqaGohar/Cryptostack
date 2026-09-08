@@ -5,16 +5,20 @@ import { NextRequest, NextResponse } from "next/server";
 // For production: your Render/Railway URL
 const PYTHON_BACKEND_URL = process.env.SIGNALS_API_URL || "http://localhost:8000";
 
-// Direct Binance endpoints (fallback if Python backend is down)
-const BINANCE_FUTURES = "https://fapi.binance.com";
+// Gate.io Futures API (works globally, no geo-restrictions)
+const GATE_FUTURES = "https://api.gateio.ws/api/v4/futures/usdt";
 
 const TOP_25 = [
   "BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT",
   "DOGEUSDT", "ADAUSDT", "AVAXUSDT", "LINKUSDT", "DOTUSDT",
-  "MATICUSDT", "UNIUSDT", "LTCUSDT", "ATOMUSDT", "NEARUSDT",
+  "POLUSDT", "UNIUSDT", "LTCUSDT", "ATOMUSDT", "NEARUSDT",
   "APTUSDT", "ARBUSDT", "OPUSDT", "SUIUSDT", "INJUSDT",
   "FILUSDT", "RENDERUSDT", "SEIUSDT", "TIAUSDT", "WLDUSDT",
 ];
+
+function toGateSymbol(symbol: string): string {
+  return symbol.replace("USDT", "_USDT");
+}
 
 // ─── Indicator Calculations (inlined for fallback) ──────────────────────────
 function ema(data: number[], period: number): number[] {
@@ -76,33 +80,37 @@ function fp(price: number): number {
   return Math.round(price * 100000000) / 100000000;
 }
 
-// ─── Direct Binance Fetch (Fallback) ────────────────────────────────────────
-async function fetchFromBinance(interval: string) {
+// ─── Direct Gate.io Futures Fetch (Fallback) ────────────────────────────────
+async function fetchFromGate(interval: string) {
   const now = new Date().toISOString();
   const signals = [];
 
   for (const symbol of TOP_25) {
     try {
-      const [kRes, tRes, fRes, oRes] = await Promise.all([
-        fetch(`${BINANCE_FUTURES}/fapi/v1/klines?symbol=${symbol}&interval=${interval}&limit=100`),
-        fetch(`${BINANCE_FUTURES}/fapi/v1/ticker/24hr?symbol=${symbol}`),
-        fetch(`${BINANCE_FUTURES}/fapi/v1/premiumIndex?symbol=${symbol}`),
-        fetch(`${BINANCE_FUTURES}/fapi/v1/openInterest?symbol=${symbol}`),
+      const gateSym = toGateSymbol(symbol);
+
+      const [tickersRes, klinesRes, contractRes] = await Promise.all([
+        fetch(`${GATE_FUTURES}/tickers?contract=${gateSym}`),
+        fetch(`${GATE_FUTURES}/candlesticks?contract=${gateSym}&interval=${interval}&limit=100`),
+        fetch(`${GATE_FUTURES}/contracts/${gateSym}`),
       ]);
 
-      const klines = await kRes.json();
-      const ticker = await tRes.json();
-      const funding = await fRes.json();
-      const oi = await oRes.json();
+      const tickersData = await tickersRes.json();
+      const klinesData = await klinesRes.json();
+      const contractData = await contractRes.json();
 
-      if (!Array.isArray(klines) || klines.length < 50) continue;
+      const ticker = Array.isArray(tickersData) ? tickersData[0] : null;
+      const klines = Array.isArray(klinesData) ? klinesData : [];
 
-      const closes = klines.map((k: any[]) => parseFloat(k[4]));
-      const highs = klines.map((k: any[]) => parseFloat(k[2]));
-      const lows = klines.map((k: any[]) => parseFloat(k[3]));
-      const volumes = klines.map((k: any[]) => parseFloat(k[5]));
+      if (!ticker || !klines.length || klines.length < 50) continue;
 
-      const currentPrice = parseFloat(ticker.lastPrice || "0");
+      // Gate.io klines: {o, h, l, c, v, t, sum}
+      const closes = klines.map((k: any) => parseFloat(k.c));
+      const highs = klines.map((k: any) => parseFloat(k.h));
+      const lows = klines.map((k: any) => parseFloat(k.l));
+      const volumes = klines.map((k: any) => parseFloat(k.v));
+
+      const currentPrice = parseFloat(ticker.last || "0");
       if (currentPrice === 0) continue;
 
       const ema12 = ema(closes, 12);
@@ -112,9 +120,9 @@ async function fetchFromBinance(interval: string) {
       const atrVal = atr(highs, lows, closes, 14);
       const atrPct = (atrVal / currentPrice) * 100;
       const volAvg = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;
-      const fundingRate = parseFloat(funding.lastFundingRate || "0");
+      const fundingRate = parseFloat(ticker.funding_rate_indicative || contractData.funding_rate || "0");
       const fundingBps = Math.round(fundingRate * 10000 * 100) / 100;
-      const oiVal = parseFloat(oi.openInterest || "0");
+      const oiVal = parseFloat(contractData.position_size || "0");
 
       // Trend
       let direction = "Sideways";
@@ -188,7 +196,7 @@ async function fetchFromBinance(interval: string) {
         symbol,
         name: formatSym(symbol),
         price: fp(currentPrice),
-        change24h: Math.round(parseFloat(ticker.priceChangePercent || "0") * 100) / 100,
+        change24h: Math.round(parseFloat(ticker.change_percentage || "0") * 100) / 100,
         decision,
         strength,
         riskLevel,
@@ -242,12 +250,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(data);
     }
   } catch {
-    console.log("⚠️ Python backend unavailable, falling back to direct Binance fetch");
+    console.log("Python backend unavailable, falling back to direct Gate.io fetch");
   }
 
-  // Fallback: fetch directly from Binance
+  // Fallback: fetch directly from Gate.io Futures (no geo-restrictions)
   try {
-    const data = await fetchFromBinance(interval);
+    const data = await fetchFromGate(interval);
     return NextResponse.json(data);
   } catch (err) {
     return NextResponse.json(
