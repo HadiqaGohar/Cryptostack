@@ -1,111 +1,257 @@
 import { NextRequest, NextResponse } from "next/server";
-import { calculateSignal, calculateSparkline } from "@/lib/indicators";
 
-const COINS = [
-  "BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT",
-  "DOGEUSDT", "LTCUSDT", "LINKUSDT", "AVAXUSDT", "BNBUSDT",
+// Python backend URL — set SIGNALS_API_URL env var in Vercel
+// For local dev: http://localhost:8000
+// For production: your Render/Railway URL
+const PYTHON_BACKEND_URL = process.env.SIGNALS_API_URL || "http://localhost:8000";
+
+// Direct Binance endpoints (fallback if Python backend is down)
+const BINANCE_FUTURES = "https://fapi.binance.com";
+
+const TOP_25 = [
+  "BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT",
+  "DOGEUSDT", "ADAUSDT", "AVAXUSDT", "LINKUSDT", "DOTUSDT",
+  "MATICUSDT", "UNIUSDT", "LTCUSDT", "ATOMUSDT", "NEARUSDT",
+  "APTUSDT", "ARBUSDT", "OPUSDT", "SUIUSDT", "INJUSDT",
+  "FILUSDT", "RENDERUSDT", "SEIUSDT", "TIAUSDT", "WLDUSDT",
 ];
 
-const COIN_NAMES: Record<string, string> = {
-  BTCUSDT: "Bitcoin",
-  ETHUSDT: "Ethereum",
-  SOLUSDT: "Solana",
-  XRPUSDT: "Ripple",
-  ADAUSDT: "Cardano",
-  DOGEUSDT: "Dogecoin",
-  LTCUSDT: "Litecoin",
-  LINKUSDT: "Chainlink",
-  AVAXUSDT: "Avalanche",
-  BNBUSDT: "BNB",
-};
-
-const VALID_INTERVALS = ["15m", "1h"] as const;
-
-type Kline = [
-  number, // openTime
-  string, // open
-  string, // high
-  string, // low
-  string, // close
-  string, // volume
-  number, // closeTime
-  string, // quoteAssetVolume
-  number, // trades
-  string, // takerBuyBaseVolume
-  string, // takerBuyQuoteVolume
-  string, // ignore
-];
-
-async function fetchCoinData(symbol: string, interval: string) {
-  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=100`;
-  const res = await fetch(url);
-
-  if (!res.ok) {
-    throw new Error(`Binance API error for ${symbol}: ${res.status}`);
+// ─── Indicator Calculations (inlined for fallback) ──────────────────────────
+function ema(data: number[], period: number): number[] {
+  if (data.length < period) return data.map(() => 0);
+  const mult = 2 / (period + 1);
+  const result: number[] = new Array(period - 1).fill(0);
+  let emaVal = data.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  result.push(emaVal);
+  for (let i = period; i < data.length; i++) {
+    emaVal = (data[i] - emaVal) * mult + emaVal;
+    result.push(emaVal);
   }
-
-  const klines: Kline[] = await res.json();
-
-  const closes = klines.map((k) => parseFloat(k[4]));
-  const highs = klines.map((k) => parseFloat(k[2]));
-  const lows = klines.map((k) => parseFloat(k[3]));
-  const volumes = klines.map((k) => parseFloat(k[5]));
-
-  const currentPrice = closes[closes.length - 1];
-
-  const lookback = interval === "15m" ? 96 : 24;
-  const previousPrice = closes[Math.max(0, closes.length - 1 - lookback)];
-  const change24h = previousPrice > 0
-    ? ((currentPrice - previousPrice) / previousPrice) * 100
-    : 0;
-
-  const signal = calculateSignal(symbol, closes, highs, lows, volumes);
-  const sparkline = calculateSparkline(closes, 20);
-
-  return {
-    symbol,
-    name: COIN_NAMES[symbol] || symbol,
-    price: currentPrice,
-    change24h: parseFloat(change24h.toFixed(2)),
-    decision: signal.decision,
-    strength: signal.strength,
-    riskLevel: signal.riskLevel,
-    entryPrice: signal.entryPrice,
-    entryZone: signal.entryZone,
-    stopLoss: signal.stopLoss,
-    takeProfit1: signal.takeProfit1,
-    takeProfit2: signal.takeProfit2,
-    takeProfit3: signal.takeProfit3,
-    riskReward: signal.riskReward,
-    leverageRange: signal.leverageRange,
-    reason: signal.reason,
-    indicators: signal.indicators,
-    marketContext: signal.marketContext,
-    sparkline,
-  };
+  return result;
 }
 
+function rsi(closes: number[], period = 14): number {
+  if (closes.length < period + 1) return 50;
+  const gains: number[] = [];
+  const losses: number[] = [];
+  for (let i = 1; i < closes.length; i++) {
+    const change = closes[i] - closes[i - 1];
+    gains.push(Math.max(change, 0));
+    losses.push(Math.max(-change, 0));
+  }
+  if (gains.length < period) return 50;
+  let avgGain = gains.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  let avgLoss = losses.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  for (let i = period; i < gains.length; i++) {
+    avgGain = (avgGain * (period - 1) + gains[i]) / period;
+    avgLoss = (avgLoss * (period - 1) + losses[i]) / period;
+  }
+  if (avgLoss === 0) return 100;
+  const rs = avgGain / avgLoss;
+  return 100 - 100 / (1 + rs);
+}
+
+function atr(highs: number[], lows: number[], closes: number[], period = 14): number {
+  if (closes.length < 2) return 0;
+  const trs: number[] = [];
+  for (let i = 1; i < closes.length; i++) {
+    trs.push(Math.max(highs[i] - lows[i], Math.abs(highs[i] - closes[i - 1]), Math.abs(lows[i] - closes[i - 1])));
+  }
+  if (trs.length < period) return trs.reduce((a, b) => a + b, 0) / trs.length;
+  let atrVal = trs.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  for (let i = period; i < trs.length; i++) {
+    atrVal = (atrVal * (period - 1) + trs[i]) / period;
+  }
+  return atrVal;
+}
+
+function formatSym(symbol: string): string {
+  return symbol.endsWith("USDT") ? symbol.slice(0, -4) + "/USDT" : symbol;
+}
+
+function fp(price: number): number {
+  if (price >= 100) return Math.round(price * 100) / 100;
+  if (price >= 1) return Math.round(price * 10000) / 10000;
+  if (price >= 0.01) return Math.round(price * 1000000) / 1000000;
+  return Math.round(price * 100000000) / 100000000;
+}
+
+// ─── Direct Binance Fetch (Fallback) ────────────────────────────────────────
+async function fetchFromBinance(interval: string) {
+  const now = new Date().toISOString();
+  const signals = [];
+
+  for (const symbol of TOP_25) {
+    try {
+      const [kRes, tRes, fRes, oRes] = await Promise.all([
+        fetch(`${BINANCE_FUTURES}/fapi/v1/klines?symbol=${symbol}&interval=${interval}&limit=100`),
+        fetch(`${BINANCE_FUTURES}/fapi/v1/ticker/24hr?symbol=${symbol}`),
+        fetch(`${BINANCE_FUTURES}/fapi/v1/premiumIndex?symbol=${symbol}`),
+        fetch(`${BINANCE_FUTURES}/fapi/v1/openInterest?symbol=${symbol}`),
+      ]);
+
+      const klines = await kRes.json();
+      const ticker = await tRes.json();
+      const funding = await fRes.json();
+      const oi = await oRes.json();
+
+      if (!Array.isArray(klines) || klines.length < 50) continue;
+
+      const closes = klines.map((k: any[]) => parseFloat(k[4]));
+      const highs = klines.map((k: any[]) => parseFloat(k[2]));
+      const lows = klines.map((k: any[]) => parseFloat(k[3]));
+      const volumes = klines.map((k: any[]) => parseFloat(k[5]));
+
+      const currentPrice = parseFloat(ticker.lastPrice || "0");
+      if (currentPrice === 0) continue;
+
+      const ema12 = ema(closes, 12);
+      const ema26 = ema(closes, 26);
+      const ema50 = ema(closes, 50);
+      const rsiVal = rsi(closes, 14);
+      const atrVal = atr(highs, lows, closes, 14);
+      const atrPct = (atrVal / currentPrice) * 100;
+      const volAvg = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;
+      const fundingRate = parseFloat(funding.lastFundingRate || "0");
+      const fundingBps = Math.round(fundingRate * 10000 * 100) / 100;
+      const oiVal = parseFloat(oi.openInterest || "0");
+
+      // Trend
+      let direction = "Sideways";
+      let trendScore = 0;
+      if (ema12[ema12.length - 1] > ema26[ema26.length - 1] && ema26[ema26.length - 1] > ema50[ema50.length - 1] && currentPrice > ema50[ema50.length - 1]) {
+        direction = "Bullish";
+        trendScore = currentPrice > ema12[ema12.length - 1] ? 50 : 35;
+      } else if (ema12[ema12.length - 1] < ema26[ema26.length - 1] && ema26[ema26.length - 1] < ema50[ema50.length - 1] && currentPrice < ema50[ema50.length - 1]) {
+        direction = "Bearish";
+        trendScore = currentPrice < ema12[ema12.length - 1] ? 50 : 35;
+      }
+
+      // RSI score
+      let rsiScore = 0;
+      if (rsiVal >= 40 && rsiVal <= 60) rsiScore = 20;
+      else if (rsiVal > 60 && rsiVal <= 70) rsiScore = 15;
+      else if (rsiVal >= 30 && rsiVal < 40) rsiScore = 15;
+      else rsiScore = -5;
+
+      // Volume score
+      const volRatio = volumes[volumes.length - 1] / volAvg;
+      const volScore = volRatio >= 1.5 ? 20 : volRatio >= 1 ? 10 : volRatio >= 0.7 ? 5 : -5;
+
+      // Volatility score
+      const volatScore = atrPct >= 1 && atrPct <= 3 ? 15 : atrPct < 1 ? 5 : atrPct <= 5 ? 5 : -10;
+
+      const totalScore = Math.max(0, Math.min(100, trendScore + rsiScore + volScore + volatScore));
+
+      let decision: "LONG" | "SHORT" | "WAIT";
+      let strength: "Strong" | "Medium" | "Weak";
+
+      if (totalScore >= 65) { decision = direction === "Bullish" ? "LONG" : "SHORT"; strength = "Strong"; }
+      else if (totalScore >= 45) { decision = direction === "Bullish" ? "LONG" : "SHORT"; strength = "Medium"; }
+      else if (totalScore >= 25) { decision = direction === "Bullish" ? "LONG" : "SHORT"; strength = "Weak"; }
+      else { decision = "WAIT"; strength = "Weak"; }
+
+      const riskLevel = atrPct > 4 ? "High" : atrPct > 2.5 ? "Medium" : "Low";
+
+      let entry = currentPrice;
+      let sl = 0, tp1 = 0, tp2 = 0, tp3 = 0;
+      let rr = 0;
+
+      if (decision !== "WAIT") {
+        if (decision === "LONG") {
+          sl = fp(entry - atrVal * 1.5);
+          tp1 = fp(entry + atrVal * 2);
+          tp2 = fp(entry + atrVal * 3);
+          tp3 = fp(entry + atrVal * 5);
+        } else {
+          sl = fp(entry + atrVal * 1.5);
+          tp1 = fp(entry - atrVal * 2);
+          tp2 = fp(entry - atrVal * 3);
+          tp3 = fp(entry - atrVal * 5);
+        }
+        const risk = Math.abs(entry - sl);
+        const reward = Math.abs(tp1 - entry);
+        rr = risk > 0 ? Math.round(reward / risk * 10) / 10 : 0;
+      }
+
+      const volBucket = atrPct < 1 ? "Low" : atrPct <= 3 ? "Normal" : "High";
+      const volState = volRatio < 0.7 ? "Low" : volRatio <= 1.5 ? "Normal" : "High";
+
+      let reason = "Waiting for confirmation";
+      if (decision !== "WAIT") {
+        if (trendScore >= 40) reason = `Strong ${direction.toLowerCase()} alignment, RSI healthy, volume confirms`;
+        else if (trendScore >= 25) reason = `Trend ${direction.toLowerCase()}, momentum confirmed`;
+        else reason = `${direction === "Bullish" ? "Bullish" : "Bearish"} setup confirmed`;
+      }
+
+      signals.push({
+        symbol,
+        name: formatSym(symbol),
+        price: fp(currentPrice),
+        change24h: Math.round(parseFloat(ticker.priceChangePercent || "0") * 100) / 100,
+        decision,
+        strength,
+        riskLevel,
+        entryPrice: fp(entry),
+        entryZone: { low: fp(entry - atrVal * 0.3), high: fp(entry + atrVal * 0.3) },
+        stopLoss: sl,
+        takeProfit1: tp1,
+        takeProfit2: tp2,
+        takeProfit3: tp3,
+        riskReward: rr,
+        leverageRange: riskLevel === "Low" ? "5-15x" : riskLevel === "Medium" ? "3-10x" : "2-5x",
+        marketContext: {
+          trend: direction,
+          trendStrength: trendScore >= 40 ? "Strong" : trendScore >= 25 ? "Moderate" : "Weak",
+          higherTimeframe: "N/A",
+          volatility: volBucket,
+          volume: volState,
+          funding: `${fundingBps} bps`,
+          openInterest: oiVal > 0 ? oiVal.toLocaleString() : "N/A",
+        },
+        reason,
+        signalTime: now,
+        score: totalScore,
+        sparkline: closes.slice(-20),
+      });
+    } catch (err) {
+      console.error(`Error fetching ${symbol}:`, err);
+    }
+  }
+
+  // Sort: Strong → Medium → Weak, LONG → SHORT → WAIT
+  const dp: Record<string, number> = { LONG: 0, SHORT: 1, WAIT: 2 };
+  const sp: Record<string, number> = { Strong: 0, Medium: 1, Weak: 2 };
+  signals.sort((a, b) => (dp[a.decision] ?? 3) - (dp[b.decision] ?? 3) || (sp[a.strength] ?? 3) - (sp[b.strength] ?? 3));
+
+  return { interval, lastUpdated: now, status: "updated", count: signals.length, signals };
+}
+
+// ─── API Route ──────────────────────────────────────────────────────────────
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const rawInterval = searchParams.get("interval") || "15m";
-  const interval = VALID_INTERVALS.includes(rawInterval as typeof VALID_INTERVALS[number])
-    ? rawInterval
-    : "15m";
+  const interval = searchParams.get("interval") || "1h";
 
+  // Try Python backend first
   try {
-    const results = await Promise.all(
-      COINS.map((symbol) => fetchCoinData(symbol, interval))
-    );
-
-    return NextResponse.json({
-      interval,
-      lastUpdated: new Date().toISOString(),
-      coins: results,
+    const res = await fetch(`${PYTHON_BACKEND_URL}/signals?interval=${interval}`, {
+      signal: AbortSignal.timeout(5000),
     });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    if (res.ok) {
+      const data = await res.json();
+      return NextResponse.json(data);
+    }
+  } catch {
+    console.log("⚠️ Python backend unavailable, falling back to direct Binance fetch");
+  }
+
+  // Fallback: fetch directly from Binance
+  try {
+    const data = await fetchFromBinance(interval);
+    return NextResponse.json(data);
+  } catch (err) {
     return NextResponse.json(
-      { error: "Failed to fetch signal data", details: message },
+      { error: "Failed to fetch signals", signals: [], count: 0 },
       { status: 500 }
     );
   }
