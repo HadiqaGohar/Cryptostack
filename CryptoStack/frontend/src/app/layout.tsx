@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     type: "website",
   },
   icons: {
-    icon: "/cryptostack-logo.png",
+    icon: "/cryptostack-dark.jpeg",
   },
 };
 
